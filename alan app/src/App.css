@@ -680,6 +680,32 @@
   50% { opacity: 0.4; }
 }
 
+/* Radio navigation (prev/next call buttons) */
+.radio-nav {
+  display: flex;
+  align-items: center;
+  gap: 2px;
+}
+
+.radio-nav-driver {
+  font-size: 10px;
+  font-weight: 700;
+  font-family: 'JetBrains Mono', monospace;
+  letter-spacing: 0.05em;
+  padding: 0 3px;
+}
+
+.radio-nav-count {
+  font-size: 10px;
+  color: #8899aa;
+  font-family: 'JetBrains Mono', monospace;
+  min-width: 30px;
+  text-align: center;
+}
+
+.radio-nav-btn { padding: 3px 5px; font-size: 10px; }
+.radio-nav-btn:disabled { opacity: 0.25; cursor: default; pointer-events: none; }
+
 /* Per-driver tune button in DriverPanel */
 .radio-tune-btn {
   background: none;

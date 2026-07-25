@@ -202,6 +202,46 @@ export default function TrackMap({
     }
   }, [progress, radioCallsWithProgress, radioEnabled, playing, tunedDriver, playSpeed, refLapDuration])
 
+  // Radio navigation — filtered to tuned driver (or all when not tuned)
+  const navCalls = useMemo(() => {
+    if (!radioCallsWithProgress?.length || !radioEnabled) return []
+    return tunedDriver
+      ? radioCallsWithProgress.filter(r => r.driver === tunedDriver)
+      : radioCallsWithProgress
+  }, [radioCallsWithProgress, radioEnabled, tunedDriver])
+
+  const currentNavIdx = useMemo(() => {
+    let idx = -1
+    for (let i = 0; i < navCalls.length; i++) {
+      if (navCalls[i].progress <= progress) idx = i
+      else break
+    }
+    return idx
+  }, [navCalls, progress])
+
+  const goToPrevRadio = useCallback(() => {
+    if (navCalls.length === 0 || refLapDuration <= 0) return
+    const leadIn = 3 / refLapDuration   // seek 3 race-seconds before the call
+    // Find last call that is far enough before current position
+    const cutoff = progress - leadIn - 0.001
+    let targetIdx = -1
+    for (let i = navCalls.length - 1; i >= 0; i--) {
+      if (navCalls[i].progress < cutoff) { targetIdx = i; break }
+    }
+    if (targetIdx >= 0) onProgressChange(Math.max(0, navCalls[targetIdx].progress - leadIn))
+  }, [navCalls, progress, refLapDuration, onProgressChange])
+
+  const goToNextRadio = useCallback(() => {
+    if (navCalls.length === 0 || refLapDuration <= 0) return
+    const leadIn = 3 / refLapDuration
+    // Find first call strictly after current position
+    let targetIdx = -1
+    for (let i = 0; i < navCalls.length; i++) {
+      if (navCalls[i].progress > progress + 0.001) { targetIdx = i; break }
+    }
+    if (targetIdx >= 0) onProgressChange(Math.max(0, navCalls[targetIdx].progress - leadIn))
+  }, [navCalls, progress, refLapDuration, onProgressChange])
+
   const handleScreenshot = useCallback(async () => {
     const el = containerRef.current
     if (!el) return
@@ -793,6 +833,30 @@ export default function TrackMap({
             >
               📻
             </button>
+            {radioEnabled && navCalls.length > 0 && (
+              <div className="radio-nav">
+                {tunedDriver && (
+                  <span className="radio-nav-driver" style={{ color: driverColor(tunedDriver) }}>
+                    {tunedDriver}
+                  </span>
+                )}
+                <button
+                  className="speed-btn radio-nav-btn"
+                  onClick={goToPrevRadio}
+                  disabled={currentNavIdx <= 0}
+                  title="Previous radio message"
+                >⏮</button>
+                <span className="radio-nav-count">
+                  {Math.max(0, currentNavIdx + 1)}/{navCalls.length}
+                </span>
+                <button
+                  className="speed-btn radio-nav-btn"
+                  onClick={goToNextRadio}
+                  disabled={currentNavIdx >= navCalls.length - 1}
+                  title="Next radio message"
+                >⏭</button>
+              </div>
+            )}
             {radioEnabled && activeRadioCall && (
               <div
                 className={`radio-now-playing ${tunedDriver === activeRadioCall.driver ? 'radio-locked' : ''}`}

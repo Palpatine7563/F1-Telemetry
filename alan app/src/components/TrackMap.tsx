@@ -293,58 +293,52 @@ export default function TrackMap({
   const allPoints = useMemo(() => {
     const entries = Object.entries(driverTelemetry)
     if (entries.length === 0) return []
-    const maxRelDist = totalLaps > 1 ? 1.05 / totalLaps : 1
-    // Prefer drivers who didn't pit on lap 1 — a lap-1 pit stop means their first-lap
-    // GPS trace includes the pit lane, which would corrupt the transform bounding box.
-    const lap1Pitters = new Set(
+    // For full race: use lap 2 (relDist 1/n → 2/n) as the circuit shape reference.
+    // Lap 1 starts from grid boxes which are laterally offset from the racing line,
+    // causing the main straight to appear doubled in the SVG. Lap 2 begins and ends
+    // at the finish line on the proper racing line, giving a clean single-pass trace.
+    const [minRelDist, maxRelDist] = totalLaps > 1
+      ? [1.0 / totalLaps, 2.0 / totalLaps]
+      : [0, 1]
+    // Exclude drivers who pitted on laps 1-2 — their GPS trace in that range includes
+    // the pit lane and would corrupt the circuit bounding box used to build the transform.
+    const earlyPitters = new Set(
       Object.entries(pitStops ?? {})
-        .filter(([, stops]) => stops.some(s => s.lap === 1))
+        .filter(([, stops]) => stops.some(s => s.lap <= 2))
         .map(([d]) => d)
     )
     const gpsCount = ([, tel]: [string, TelemetryPoint[]]) =>
       tel.filter(p => isFinite(p.x) && isFinite(p.y)).length
-    const eligible = entries.filter(([d]) => !lap1Pitters.has(d))
+    const eligible = entries.filter(([d]) => !earlyPitters.has(d))
     const pool = eligible.length > 0 ? eligible : entries
     const [, ref] = pool.reduce((best, cur) => gpsCount(cur) > gpsCount(best) ? cur : best)
-    // For full race (multiple laps), only use first lap to avoid drawing all laps as overlapping paths
     return ref
-      .filter(p => isFinite(p.x) && isFinite(p.y) && p.relDist <= maxRelDist)
+      .filter(p => isFinite(p.x) && isFinite(p.y) && p.relDist >= minRelDist && p.relDist <= maxRelDist)
       .map(p => ({ x: p.x, y: p.y }))
   }, [driverTelemetry, totalLaps, pitStops])
 
-  // Pit lane path — speed-based detection: any section where a driver sustains < 80 km/h
-  // for > 20 consecutive seconds. The 20s threshold separates pit stops (25–35s) from
-  // slow corners like Monaco's Loews hairpin (8–12s). Only the single longest qualifying
-  // segment is rendered to avoid opacity stacking from multiple drivers/stops.
+  // Pit lane path — hybrid detection: use pitStops timestamps as a narrow search window,
+  // then speed-filter (< 80 km/h) within that window to find the actual pit lane traversal.
+  // This avoids the safety-car false positive (SC sections are outside any pit stop window)
+  // that breaks pure speed-based detection at circuits like Monaco 2026.
   const pitLaneSegments = useMemo(() => {
-    if (totalLaps === 0) return [] as { x: number; y: number }[][]
+    if (totalLaps === 0 || !pitStops || Object.keys(pitStops).length === 0) return [] as { x: number; y: number }[][]
     let bestSeg: { x: number; y: number }[] = []
-    for (const tel of Object.values(driverTelemetry)) {
-      let segStart = -1
-      let segStartTime = 0
-      for (let i = 0; i < tel.length; i++) {
-        const pt = tel[i]
-        const isSlow = pt.speed > 0 && pt.speed < 80
-        if (isSlow && segStart === -1) { segStart = i; segStartTime = pt.time }
-        else if (!isSlow && segStart !== -1) {
-          if (tel[i - 1].time - segStartTime >= 20) {
-            const seg = tel.slice(segStart, i)
-              .filter(p => isFinite(p.x) && isFinite(p.y))
-              .map(p => ({ x: p.x, y: p.y }))
-            if (seg.length > bestSeg.length) bestSeg = seg
-          }
-          segStart = -1
-        }
-      }
-      if (segStart !== -1 && (tel.at(-1)?.time ?? 0) - segStartTime >= 20) {
-        const seg = tel.slice(segStart)
-          .filter(p => isFinite(p.x) && isFinite(p.y))
-          .map(p => ({ x: p.x, y: p.y }))
-        if (seg.length > bestSeg.length) bestSeg = seg
+    for (const [driver, stops] of Object.entries(pitStops)) {
+      const tel = driverTelemetry[driver]
+      if (!tel || tel.length === 0) continue
+      for (const stop of stops) {
+        // 5-second buffer on each side of the known pit window to include pit entry/exit
+        const inWindow = tel.filter(p =>
+          p.time >= stop.in - 5 && p.time <= stop.out + 5 &&
+          p.speed > 0 && p.speed < 80 &&
+          isFinite(p.x) && isFinite(p.y)
+        )
+        if (inWindow.length > bestSeg.length) bestSeg = inWindow.map(p => ({ x: p.x, y: p.y }))
       }
     }
     return bestSeg.length > 5 ? [bestSeg] : []
-  }, [driverTelemetry, totalLaps])
+  }, [driverTelemetry, pitStops, totalLaps])
 
   // Last relDist per driver — used for retired-driver detection in full race
   const driverLastRelDist = useMemo(() => {

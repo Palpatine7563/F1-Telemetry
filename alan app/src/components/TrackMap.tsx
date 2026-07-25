@@ -46,7 +46,7 @@ function buildTransform(pts: { x: number; y: number }[]): Transform {
 
 function pointsToPath(pts: { x: number; y: number }[]): string {
   if (pts.length === 0) return ''
-  return 'M ' + pts.map((p) => `${p.x.toFixed(1)},${p.y.toFixed(1)}`).join(' L ')
+  return 'M ' + pts.map((p) => `${p.x.toFixed(1)},${p.y.toFixed(1)}`).join(' L ') + ' Z'
 }
 
 interface Props {

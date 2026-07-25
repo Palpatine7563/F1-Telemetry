@@ -117,6 +117,20 @@ export default function TrackMap({
   const lastRadioIdxRef = useRef(-1)
   const prevProgressRef = useRef(0)
 
+  // poleDriver = fastest; refLapDuration = slowest (animation runs until all finish)
+  // Declared early — used by radio useEffects below before the main useMemo block.
+  const { poleDriver, refLapDuration } = useMemo(() => {
+    let pole: string | null = null
+    let bestTime = Infinity
+    let maxTime = 0
+    for (const [driver, tel] of Object.entries(driverTelemetry)) {
+      const t = tel.at(-1)?.time ?? Infinity
+      if (t < bestTime) { bestTime = t; pole = driver }
+      if (isFinite(t) && t > maxTime) maxTime = t
+    }
+    return { poleDriver: pole, refLapDuration: maxTime > 0 ? maxTime : 90 }
+  }, [driverTelemetry])
+
   // Auto-set play speed for full race vs single lap
   useEffect(() => {
     setPlaySpeed(totalLaps > 0 ? 10 : 1)
@@ -320,19 +334,6 @@ export default function TrackMap({
   }, [driverTelemetry, totalLaps])
 
   const transform = useMemo(() => buildTransform(allPoints), [allPoints])
-
-  // poleDriver = fastest; refLapDuration = slowest (animation runs until all finish)
-  const { poleDriver, refLapDuration } = useMemo(() => {
-    let pole: string | null = null
-    let bestTime = Infinity
-    let maxTime = 0
-    for (const [driver, tel] of Object.entries(driverTelemetry)) {
-      const t = tel.at(-1)?.time ?? Infinity
-      if (t < bestTime) { bestTime = t; pole = driver }
-      if (isFinite(t) && t > maxTime) maxTime = t
-    }
-    return { poleDriver: pole, refLapDuration: maxTime > 0 ? maxTime : 90 }
-  }, [driverTelemetry])
 
   // Clip zones per driver — computed once per session load
   const clipZones = useMemo(() => {

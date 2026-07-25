@@ -291,24 +291,35 @@ export default function TrackMap({
   }, [circuitId])
 
   const allPoints = useMemo(() => {
-    const entries = Object.values(driverTelemetry)
+    const entries = Object.entries(driverTelemetry)
     if (entries.length === 0) return []
-    // Pick the driver with the most GPS-valid points (some sessions lack X/Y)
-    const gpsCount = (tel: typeof entries[0]) => tel.filter(p => isFinite(p.x) && isFinite(p.y)).length
-    const ref = entries.reduce((best, cur) => gpsCount(cur) > gpsCount(best) ? cur : best)
-    // For full race (multiple laps), only use first lap to avoid drawing all laps as overlapping paths
     const maxRelDist = totalLaps > 1 ? 1.05 / totalLaps : 1
+    // Prefer drivers who didn't pit on lap 1 — a lap-1 pit stop means their first-lap
+    // GPS trace includes the pit lane, which would corrupt the transform bounding box.
+    const lap1Pitters = new Set(
+      Object.entries(pitStops ?? {})
+        .filter(([, stops]) => stops.some(s => s.lap === 1))
+        .map(([d]) => d)
+    )
+    const gpsCount = ([, tel]: [string, TelemetryPoint[]]) =>
+      tel.filter(p => isFinite(p.x) && isFinite(p.y)).length
+    const eligible = entries.filter(([d]) => !lap1Pitters.has(d))
+    const pool = eligible.length > 0 ? eligible : entries
+    const [, ref] = pool.reduce((best, cur) => gpsCount(cur) > gpsCount(best) ? cur : best)
+    // For full race (multiple laps), only use first lap to avoid drawing all laps as overlapping paths
     return ref
       .filter(p => isFinite(p.x) && isFinite(p.y) && p.relDist <= maxRelDist)
       .map(p => ({ x: p.x, y: p.y }))
-  }, [driverTelemetry, totalLaps])
+  }, [driverTelemetry, totalLaps, pitStops])
 
-  // Pit lane path — extracted from actual pit stop timestamps (in/out seconds).
-  // Using timestamps instead of a speed heuristic avoids false positives on
-  // circuits like Monaco where slow-corner complexes can last 15+ seconds.
+  // Pit lane path — one representative segment (the longest pit stop GPS trace found).
+  // Using timestamps avoids false positives on circuits like Monaco where slow-corner
+  // complexes can last 15+ seconds. Using a single segment avoids opacity stacking when
+  // many drivers pit (e.g. Monaco 2026 had 70 pit stops — rendering all would make
+  // the pit lane appear fully opaque and overwhelm the circuit).
   const pitLaneSegments = useMemo(() => {
     if (totalLaps === 0 || !pitStops || Object.keys(pitStops).length === 0) return [] as { x: number; y: number }[][]
-    const segs: { x: number; y: number }[][] = []
+    let bestSeg: { x: number; y: number }[] = []
     for (const [driver, stops] of Object.entries(pitStops)) {
       const tel = driverTelemetry[driver]
       if (!tel || tel.length === 0) continue
@@ -317,10 +328,10 @@ export default function TrackMap({
           .filter(p => p.time >= stop.in - 2 && p.time <= stop.out + 2)
           .filter(p => isFinite(p.x) && isFinite(p.y))
           .map(p => ({ x: p.x, y: p.y }))
-        if (seg.length > 3) segs.push(seg)
+        if (seg.length > bestSeg.length) bestSeg = seg
       }
     }
-    return segs
+    return bestSeg.length > 3 ? [bestSeg] : []
   }, [driverTelemetry, pitStops, totalLaps])
 
   // Last relDist per driver — used for retired-driver detection in full race

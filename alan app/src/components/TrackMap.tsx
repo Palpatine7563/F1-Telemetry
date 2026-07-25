@@ -146,12 +146,13 @@ export default function TrackMap({
     }
   }, [playing, radioEnabled])
 
-  // Reset radio index when session/circuit changes
+  // Reset radio index when session/circuit changes; auto-enable if this race has radio
   useEffect(() => {
     lastRadioIdxRef.current = -1
     prevProgressRef.current = 0
     audioRef.current?.pause()
     setActiveRadioCall(null)
+    if (radioCallsWithProgress && radioCallsWithProgress.length > 0) setRadioEnabled(true)
   }, [radioCallsWithProgress])
 
   // Auto-play team radio synchronized to replay progress

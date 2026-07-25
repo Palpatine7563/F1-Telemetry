@@ -2,6 +2,7 @@ export interface RadioCall {
   driver: string   // 3-letter abbreviation e.g. 'NOR'
   time: number     // race-relative seconds from lights out
   url: string      // F1 CDN recording URL
+  text?: string    // Whisper transcription (optional)
 }
 
 const BASE = 'https://api.openf1.org/v1'

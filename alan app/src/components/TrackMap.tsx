@@ -69,7 +69,7 @@ interface Props {
   pitStops?: Record<string, PitStopInfo[]>
   standingRestartLaps?: Set<number>
   overtakeMarkers?: number[]  // progress fractions where position changes occurred
-  radioCallsWithProgress?: Array<{ driver: string; progress: number; url: string }>
+  radioCallsWithProgress?: Array<{ driver: string; progress: number; url: string; text?: string }>
   tunedDriver?: string | null
   onTuneDriver?: (driver: string | null) => void
   loading?: boolean
@@ -113,7 +113,7 @@ export default function TrackMap({
   const [showClipTip,      setShowClipTip]      = useState(false)
   const [showSpeedWarn,    setShowSpeedWarn]    = useState(false)
   const [radioEnabled,     setRadioEnabled]     = useState(false)
-  const [activeRadioCall,  setActiveRadioCall]  = useState<{ driver: string; url: string } | null>(null)
+  const [activeRadioCall,  setActiveRadioCall]  = useState<{ driver: string; url: string; text?: string } | null>(null)
   const speedWarnTimer  = useRef<ReturnType<typeof setTimeout> | null>(null)
   const audioRef        = useRef<HTMLAudioElement | null>(null)
   const lastRadioIdxRef = useRef(-1)
@@ -200,7 +200,7 @@ export default function TrackMap({
     }
 
     // Normal forward playback at ≤10× — find all newly passed calls, play the latest match
-    let callToPlay: { driver: string; url: string } | null = null
+    let callToPlay: { driver: string; url: string; text?: string } | null = null
     for (let i = lastRadioIdxRef.current + 1; i < radioCallsWithProgress.length; i++) {
       const call = radioCallsWithProgress[i]
       if (call.progress > progress) break
@@ -828,7 +828,7 @@ export default function TrackMap({
                   key={i}
                   className="radio-mark"
                   style={{
-                    left: `${r.progress * 100}%`,
+                    left: `${Math.min(r.progress, 1) * 100}%`,
                     borderColor: driverColor(r.driver),
                     opacity: !tunedDriver || tunedDriver === r.driver ? 0.85 : 0.2,
                   }}
@@ -900,16 +900,21 @@ export default function TrackMap({
             )}
             {radioEnabled && activeRadioCall && (
               <div
-                className={`radio-now-playing ${tunedDriver === activeRadioCall.driver ? 'radio-locked' : ''}`}
+                className={`radio-now-playing ${tunedDriver === activeRadioCall.driver ? 'radio-locked' : ''} ${activeRadioCall.text ? 'radio-has-caption' : ''}`}
                 onClick={() => onTuneDriver?.(tunedDriver === activeRadioCall.driver ? null : activeRadioCall.driver)}
                 title={tunedDriver === activeRadioCall.driver ? 'Click to disconnect' : `Click to lock onto ${activeRadioCall.driver}`}
               >
-                <span
-                  className="radio-driver-dot"
-                  style={{ background: driverColor(activeRadioCall.driver) }}
-                />
-                <span className="radio-driver-name">{activeRadioCall.driver}</span>
-                <span className="radio-wave-icon">📻</span>
+                <div className="radio-now-playing-header">
+                  <span
+                    className="radio-driver-dot"
+                    style={{ background: driverColor(activeRadioCall.driver) }}
+                  />
+                  <span className="radio-driver-name">{activeRadioCall.driver}</span>
+                  <span className="radio-wave-icon">📻</span>
+                </div>
+                {activeRadioCall.text && (
+                  <span className="radio-caption">{activeRadioCall.text}</span>
+                )}
               </div>
             )}
             {radioEnabled && tunedDriver && !activeRadioCall && (

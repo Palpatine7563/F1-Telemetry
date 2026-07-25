@@ -466,8 +466,8 @@ export default function App() {
   const radioCallsWithProgress = useMemo(() => {
     if (refLapDuration <= 0 || radioData.length === 0) return []
     return radioData
-      .map(r => ({ driver: r.driver, url: r.url, progress: r.time / refLapDuration }))
-      .filter(r => r.progress >= 0 && r.progress <= 1.02)
+      .map(r => ({ driver: r.driver, url: r.url, text: r.text, progress: r.time / refLapDuration }))
+      .filter(r => r.progress >= 0 && r.progress <= 1.5)
   }, [radioData, refLapDuration])
 
   // Position of each driver at the end of each lap — for the position chart

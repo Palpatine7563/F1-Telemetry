@@ -6,7 +6,21 @@ export interface RadioCall {
 
 const BASE = 'https://api.openf1.org/v1'
 
-export async function fetchRaceRadio(year: number, raceDate: string): Promise<RadioCall[]> {
+// Tries the pre-cached local JSON first; falls back to live OpenF1 API only if local is absent.
+export async function fetchRaceRadio(year: number, raceDate: string, localUrl?: string): Promise<RadioCall[]> {
+  if (localUrl) {
+    try {
+      const res = await fetch(localUrl)
+      if (res.ok) {
+        const data: RadioCall[] = await res.json()
+        if (Array.isArray(data)) return data   // trust local even if empty (means no data available)
+      }
+    } catch { /* fall through to live API */ }
+  }
+  return fetchRaceRadioFromApi(year, raceDate)
+}
+
+async function fetchRaceRadioFromApi(year: number, raceDate: string): Promise<RadioCall[]> {
   try {
     const sessRes = await fetch(`${BASE}/sessions?year=${year}&session_name=Race`)
     if (!sessRes.ok) return []

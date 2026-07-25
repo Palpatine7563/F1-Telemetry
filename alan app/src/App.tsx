@@ -1,6 +1,6 @@
 import { useState, useEffect, useMemo, useCallback, useRef } from 'react'
 import type { CircuitConfig, CircuitSession, TelemetryPoint, ColorMode } from './types'
-import { CIRCUITS, telemetryUrl, fullRaceUrl } from './lib/dataIndex'
+import { CIRCUITS, telemetryUrl, fullRaceUrl, teamRadioUrl } from './lib/dataIndex'
 import { loadAllDriverTelemetry, loadTelemetryFromFile, loadFullRaceTelemetry } from './lib/csvLoader'
 import type { SafetyCarPeriod, StintInfo, PitStopInfo, OvertakeEvent } from './lib/csvLoader'
 import { computeMiniSectors, computeMiniSectorsFromSegments } from './lib/miniSectors'
@@ -215,8 +215,8 @@ export default function App() {
         setActiveDrivers(new Set(Object.keys(data)))
         setLoading(false)
       }).catch(() => setLoading(false))
-      // Radio loads independently — doesn't block replay
-      fetchRaceRadio(year, circuit.raceDate).then(setRadioData).catch(() => {})
+      // Radio loads independently — prefers local cache, falls back to live OpenF1 API
+      fetchRaceRadio(year, circuit.raceDate, teamRadioUrl(circuit.id, year)).then(setRadioData).catch(() => {})
       return
     }
 

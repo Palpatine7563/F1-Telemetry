@@ -141,3 +141,7 @@ export function telemetryUrl(circuitId: string, year: number, sessionType: Sessi
 export function fullRaceUrl(circuitId: string, year: number, sessionFolder = 'race'): string {
   return `/data/FastF1%20Data/fastf1_${year}_${circuitFolder(circuitId)}_grand_prix/${sessionFolder}/telemetry_full_race.json`
 }
+
+export function teamRadioUrl(circuitId: string, year: number, sessionFolder = 'race'): string {
+  return `/data/FastF1%20Data/fastf1_${year}_${circuitFolder(circuitId)}_grand_prix/${sessionFolder}/team_radio.json`
+}

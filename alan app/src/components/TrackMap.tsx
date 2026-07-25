@@ -312,27 +312,39 @@ export default function TrackMap({
       .map(p => ({ x: p.x, y: p.y }))
   }, [driverTelemetry, totalLaps, pitStops])
 
-  // Pit lane path — one representative segment (the longest pit stop GPS trace found).
-  // Using timestamps avoids false positives on circuits like Monaco where slow-corner
-  // complexes can last 15+ seconds. Using a single segment avoids opacity stacking when
-  // many drivers pit (e.g. Monaco 2026 had 70 pit stops — rendering all would make
-  // the pit lane appear fully opaque and overwhelm the circuit).
+  // Pit lane path — speed-based detection: any section where a driver sustains < 80 km/h
+  // for > 20 consecutive seconds. The 20s threshold separates pit stops (25–35s) from
+  // slow corners like Monaco's Loews hairpin (8–12s). Only the single longest qualifying
+  // segment is rendered to avoid opacity stacking from multiple drivers/stops.
   const pitLaneSegments = useMemo(() => {
-    if (totalLaps === 0 || !pitStops || Object.keys(pitStops).length === 0) return [] as { x: number; y: number }[][]
+    if (totalLaps === 0) return [] as { x: number; y: number }[][]
     let bestSeg: { x: number; y: number }[] = []
-    for (const [driver, stops] of Object.entries(pitStops)) {
-      const tel = driverTelemetry[driver]
-      if (!tel || tel.length === 0) continue
-      for (const stop of stops) {
-        const seg = tel
-          .filter(p => p.time >= stop.in - 2 && p.time <= stop.out + 2)
+    for (const tel of Object.values(driverTelemetry)) {
+      let segStart = -1
+      let segStartTime = 0
+      for (let i = 0; i < tel.length; i++) {
+        const pt = tel[i]
+        const isSlow = pt.speed > 0 && pt.speed < 80
+        if (isSlow && segStart === -1) { segStart = i; segStartTime = pt.time }
+        else if (!isSlow && segStart !== -1) {
+          if (tel[i - 1].time - segStartTime >= 20) {
+            const seg = tel.slice(segStart, i)
+              .filter(p => isFinite(p.x) && isFinite(p.y))
+              .map(p => ({ x: p.x, y: p.y }))
+            if (seg.length > bestSeg.length) bestSeg = seg
+          }
+          segStart = -1
+        }
+      }
+      if (segStart !== -1 && (tel.at(-1)?.time ?? 0) - segStartTime >= 20) {
+        const seg = tel.slice(segStart)
           .filter(p => isFinite(p.x) && isFinite(p.y))
           .map(p => ({ x: p.x, y: p.y }))
         if (seg.length > bestSeg.length) bestSeg = seg
       }
     }
-    return bestSeg.length > 3 ? [bestSeg] : []
-  }, [driverTelemetry, pitStops, totalLaps])
+    return bestSeg.length > 5 ? [bestSeg] : []
+  }, [driverTelemetry, totalLaps])
 
   // Last relDist per driver — used for retired-driver detection in full race
   const driverLastRelDist = useMemo(() => {

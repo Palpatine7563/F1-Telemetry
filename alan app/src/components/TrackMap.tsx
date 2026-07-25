@@ -67,6 +67,7 @@ interface Props {
   safetyCars?: (SafetyCarPeriod & { startP: number; endP: number })[]
   currentSC?: SafetyCarPeriod
   pitStops?: Record<string, PitStopInfo[]>
+  standingRestartLaps?: Set<number>
   overtakeMarkers?: number[]  // progress fractions where position changes occurred
   radioCallsWithProgress?: Array<{ driver: string; progress: number; url: string }>
   tunedDriver?: string | null
@@ -92,6 +93,7 @@ export default function TrackMap({
   safetyCars = [],
   currentSC,
   pitStops,
+  standingRestartLaps,
   overtakeMarkers,
   radioCallsWithProgress,
   tunedDriver,
@@ -314,6 +316,9 @@ export default function TrackMap({
 
     for (const lapN of [3, 2, 1]) {
       if (lapN >= totalLaps) continue
+      // Skip standing-restart laps (red-flag restarts) — they start from grid boxes which
+      // are laterally offset from the racing line, causing the main straight to appear doubled.
+      if (standingRestartLaps?.has(lapN)) continue
       const minRel = (lapN - 1) / totalLaps
       const maxRel = lapN / totalLaps
       // Exclude drivers who pitted on any lap up through lapN — their GPS in that
@@ -328,11 +333,11 @@ export default function TrackMap({
       const [, ref] = pool.reduce((best, cur) => gpsCount(cur) > gpsCount(best) ? cur : best)
       const pts = ref
         .filter(p => isFinite(p.x) && isFinite(p.y) && p.relDist >= minRel && p.relDist <= maxRel)
-        .map(p => ({ x: p.x, y: p.y }))
-      if (pts.length >= 10) return pts
+      if (pts.length < 10) continue
+      return pts.map(p => ({ x: p.x, y: p.y }))
     }
     return []
-  }, [driverTelemetry, totalLaps, pitStops])
+  }, [driverTelemetry, totalLaps, pitStops, standingRestartLaps])
 
   // Pit lane path — hybrid detection: use pitStops timestamps as a narrow search window,
   // then speed-filter (< 80 km/h) within that window to find the actual pit lane traversal.

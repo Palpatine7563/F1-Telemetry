@@ -68,6 +68,7 @@ export default function App() {
   const [stints, setStints] = useState<Record<string, StintInfo[]>>({})
   const [pitStops, setPitStops] = useState<Record<string, PitStopInfo[]>>({})
   const [overtakes, setOvertakes] = useState<OvertakeEvent[]>([])
+  const [standingRestartLaps, setStandingRestartLaps] = useState<Set<number>>(new Set())
   const [radioData, setRadioData] = useState<RadioCall[]>([])
   const [tunedDriver, setTunedDriver] = useState<string | null>(null)
 
@@ -191,6 +192,7 @@ export default function App() {
     setStints({})
     setPitStops({})
     setOvertakes([])
+    setStandingRestartLaps(new Set())
     setRadioData([])
     setTunedDriver(null)
 
@@ -203,7 +205,7 @@ export default function App() {
     const year = circuit.year ?? 2026
 
     if (session.type === 'full_race') {
-      loadFullRaceTelemetry(fullRaceUrl(circuit.id, year)).then(({ data, dnf, totalLaps: tl, lapBoundaries: lb, safetyCars: sc, stints: st, pitStops: ps, overtakes: ov }) => {
+      loadFullRaceTelemetry(fullRaceUrl(circuit.id, year)).then(({ data, dnf, totalLaps: tl, lapBoundaries: lb, safetyCars: sc, stints: st, pitStops: ps, overtakes: ov, standingRestartLaps: srl }) => {
         setDriverTelemetry(data)
         setDnfDrivers(dnf)
         setLapBoundaries(lb)
@@ -212,6 +214,7 @@ export default function App() {
         setStints(st)
         setPitStops(ps)
         setOvertakes(ov)
+        setStandingRestartLaps(srl)
         setActiveDrivers(new Set(Object.keys(data)))
         setLoading(false)
       }).catch(() => setLoading(false))
@@ -636,6 +639,7 @@ export default function App() {
                         })) : []}
                         currentSC={currentSC ?? undefined}
                         pitStops={Object.keys(pitStops).length > 0 ? pitStops : undefined}
+                        standingRestartLaps={standingRestartLaps.size > 0 ? standingRestartLaps : undefined}
                         overtakeMarkers={overtakeMarkersP.length > 0 ? overtakeMarkersP : undefined}
                         radioCallsWithProgress={radioCallsWithProgress.length > 0 ? radioCallsWithProgress : undefined}
                         tunedDriver={tunedDriver}

@@ -159,6 +159,7 @@ export interface FullRaceResult {
   stints: Record<string, StintInfo[]>
   pitStops: Record<string, PitStopInfo[]>
   overtakes: OvertakeEvent[]
+  standingRestartLaps: Set<number>  // lap numbers that follow a red-flag gap (start from grid)
 }
 
 export async function loadFullRaceTelemetry(url: string): Promise<FullRaceResult> {
@@ -288,7 +289,23 @@ export async function loadFullRaceTelemetry(url: string): Promise<FullRaceResult
   const pitStops: Record<string, PitStopInfo[]> = (json as any).pit_stops ?? {}
   const overtakes: OvertakeEvent[] = (json as any).overtakes ?? []
 
-  return { data, dnf, totalLaps, lapBoundaries, safetyCars, stints, pitStops, overtakes }
+  // Detect standing-restart laps: a lap whose t0 is > 5 min after the previous lap's t1
+  // means there was a red-flag period in between. These laps start from grid positions,
+  // which are laterally offset from the racing line and would double the main straight SVG.
+  const standingRestartLaps = new Set<number>()
+  const [timingRefDriver] = Object.entries(json.laps).reduce((best, cur) =>
+    Math.max(...cur[1].map(e => e.lap)) > Math.max(...best[1].map(e => e.lap)) ? cur : best
+  )
+  const refLapsArr = [...(json.laps[timingRefDriver] ?? [])].sort((a, b) => a.lap - b.lap)
+  for (let i = 1; i < refLapsArr.length; i++) {
+    const prev = refLapsArr[i - 1]
+    const curr = refLapsArr[i]
+    if (prev.t1 != null && curr.t0 != null && curr.t0 - prev.t1 > 300) {
+      standingRestartLaps.add(curr.lap)
+    }
+  }
+
+  return { data, dnf, totalLaps, lapBoundaries, safetyCars, stints, pitStops, overtakes, standingRestartLaps }
 }
 
 export async function loadAllDriverTelemetry(

@@ -149,19 +149,40 @@ export default function TrackMap({
     prevProgressRef.current = progress
     const jump = progress - prevP
 
-    // Large jump (scrub) — reposition index without playing
-    if (Math.abs(jump) > 0.05 || jump < 0) {
+    // Threshold: max legitimate progress change in 3 frames at current speed.
+    // Anything beyond this is a user scrub, not continuous playback.
+    // refLapDuration > 0 guard: single-lap sessions have their own refLap computed inside TrackMap.
+    const scrubThreshold = refLapDuration > 0
+      ? (playSpeed * (1 / 20)) / refLapDuration   // 3-frame window at current speed
+      : 0.005
+
+    const isScrub = jump < 0 || jump > scrubThreshold
+
+    if (isScrub) {
+      // Reposition the index to wherever we landed — no audio on scrub
       let newIdx = -1
       for (let i = radioCallsWithProgress.length - 1; i >= 0; i--) {
         if (radioCallsWithProgress[i].progress <= progress) { newIdx = i; break }
       }
       lastRadioIdxRef.current = newIdx
       audioRef.current?.pause()
-      if (jump < 0) setActiveRadioCall(null)
+      setActiveRadioCall(null)
       return
     }
 
-    // Normal forward playback — find all newly passed calls
+    // High speed: don't play audio — clips would be hopelessly out of sync
+    if (playSpeed > 10) {
+      // Still advance the index so we're in the right place if speed drops
+      for (let i = lastRadioIdxRef.current + 1; i < radioCallsWithProgress.length; i++) {
+        if (radioCallsWithProgress[i].progress > progress) break
+        lastRadioIdxRef.current = i
+      }
+      audioRef.current?.pause()
+      setActiveRadioCall(null)
+      return
+    }
+
+    // Normal forward playback at ≤10× — find all newly passed calls, play the latest match
     let callToPlay: { driver: string; url: string } | null = null
     for (let i = lastRadioIdxRef.current + 1; i < radioCallsWithProgress.length; i++) {
       const call = radioCallsWithProgress[i]
@@ -179,7 +200,7 @@ export default function TrackMap({
       audioRef.current = audio
       setActiveRadioCall(callToPlay)
     }
-  }, [progress, radioCallsWithProgress, radioEnabled, playing, tunedDriver])
+  }, [progress, radioCallsWithProgress, radioEnabled, playing, tunedDriver, playSpeed, refLapDuration])
 
   const handleScreenshot = useCallback(async () => {
     const el = containerRef.current
@@ -228,39 +249,25 @@ export default function TrackMap({
       .map(p => ({ x: p.x, y: p.y }))
   }, [driverTelemetry, totalLaps])
 
-  // Pit lane path — collected from sustained low-speed sections (>15 s < 80 km/h)
-  // across all drivers. Slow corners take 2-5 s; pit stops take 20-30 s, so 15 s
-  // cleanly separates them. Multiple drivers trace the same physical pit lane,
-  // so the overlapping segments visually merge into one clear path.
+  // Pit lane path — extracted from actual pit stop timestamps (in/out seconds).
+  // Using timestamps instead of a speed heuristic avoids false positives on
+  // circuits like Monaco where slow-corner complexes can last 15+ seconds.
   const pitLaneSegments = useMemo(() => {
-    if (totalLaps === 0) return [] as { x: number; y: number }[][]
+    if (totalLaps === 0 || !pitStops || Object.keys(pitStops).length === 0) return [] as { x: number; y: number }[][]
     const segs: { x: number; y: number }[][] = []
-    for (const tel of Object.values(driverTelemetry)) {
-      let segStart = -1
-      let segStartTime = 0
-      for (let i = 0; i < tel.length; i++) {
-        const pt = tel[i]
-        const isSlow = pt.speed > 0 && pt.speed < 80
-        if (isSlow && segStart === -1) { segStart = i; segStartTime = pt.time }
-        else if (!isSlow && segStart !== -1) {
-          if (tel[i - 1].time - segStartTime >= 15) {
-            const seg = tel.slice(segStart, i)
-              .filter(p => isFinite(p.x) && isFinite(p.y))
-              .map(p => ({ x: p.x, y: p.y }))
-            if (seg.length > 5) segs.push(seg)
-          }
-          segStart = -1
-        }
-      }
-      if (segStart !== -1 && (tel.at(-1)?.time ?? 0) - segStartTime >= 15) {
-        const seg = tel.slice(segStart)
+    for (const [driver, stops] of Object.entries(pitStops)) {
+      const tel = driverTelemetry[driver]
+      if (!tel || tel.length === 0) continue
+      for (const stop of stops) {
+        const seg = tel
+          .filter(p => p.time >= stop.in - 2 && p.time <= stop.out + 2)
           .filter(p => isFinite(p.x) && isFinite(p.y))
           .map(p => ({ x: p.x, y: p.y }))
-        if (seg.length > 5) segs.push(seg)
+        if (seg.length > 3) segs.push(seg)
       }
     }
     return segs
-  }, [driverTelemetry, totalLaps])
+  }, [driverTelemetry, pitStops, totalLaps])
 
   // Last relDist per driver — used for retired-driver detection in full race
   const driverLastRelDist = useMemo(() => {

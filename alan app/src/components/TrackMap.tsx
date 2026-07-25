@@ -293,28 +293,45 @@ export default function TrackMap({
   const allPoints = useMemo(() => {
     const entries = Object.entries(driverTelemetry)
     if (entries.length === 0) return []
-    // For full race: use lap 2 (relDist 1/n → 2/n) as the circuit shape reference.
-    // Lap 1 starts from grid boxes which are laterally offset from the racing line,
-    // causing the main straight to appear doubled in the SVG. Lap 2 begins and ends
-    // at the finish line on the proper racing line, giving a clean single-pass trace.
-    const [minRelDist, maxRelDist] = totalLaps > 1
-      ? [1.0 / totalLaps, 2.0 / totalLaps]
-      : [0, 1]
-    // Exclude drivers who pitted on laps 1-2 — their GPS trace in that range includes
-    // the pit lane and would corrupt the circuit bounding box used to build the transform.
-    const earlyPitters = new Set(
-      Object.entries(pitStops ?? {})
-        .filter(([, stops]) => stops.some(s => s.lap <= 2))
-        .map(([d]) => d)
-    )
+
+    if (totalLaps <= 1) {
+      // Single-lap session: use everything
+      const [, ref] = entries.reduce((best, cur) => {
+        const count = (tel: TelemetryPoint[]) => tel.filter(p => isFinite(p.x) && isFinite(p.y)).length
+        return count(cur[1]) > count(best[1]) ? cur : best
+      })
+      return ref.filter(p => isFinite(p.x) && isFinite(p.y)).map(p => ({ x: p.x, y: p.y }))
+    }
+
+    // For full races, lap 1 and sometimes lap 2 start from grid positions (standing
+    // starts or red-flag restarts), which are laterally offset from the racing line and
+    // cause the main straight to appear doubled. Try laps 3, 2, 1 in order.
+    //
+    // We use an exact 1-lap window (n/total → (n+1)/total) with no buffer past the
+    // finish line — avoiding the overlap that produces the second parallel line.
     const gpsCount = ([, tel]: [string, TelemetryPoint[]]) =>
       tel.filter(p => isFinite(p.x) && isFinite(p.y)).length
-    const eligible = entries.filter(([d]) => !earlyPitters.has(d))
-    const pool = eligible.length > 0 ? eligible : entries
-    const [, ref] = pool.reduce((best, cur) => gpsCount(cur) > gpsCount(best) ? cur : best)
-    return ref
-      .filter(p => isFinite(p.x) && isFinite(p.y) && p.relDist >= minRelDist && p.relDist <= maxRelDist)
-      .map(p => ({ x: p.x, y: p.y }))
+
+    for (const lapN of [3, 2, 1]) {
+      if (lapN >= totalLaps) continue
+      const minRel = (lapN - 1) / totalLaps
+      const maxRel = lapN / totalLaps
+      // Exclude drivers who pitted on any lap up through lapN — their GPS in that
+      // range includes the pit lane and would corrupt the circuit bounding box.
+      const pitters = new Set(
+        Object.entries(pitStops ?? {})
+          .filter(([, stops]) => stops.some(s => s.lap <= lapN))
+          .map(([d]) => d)
+      )
+      const eligible = entries.filter(([d]) => !pitters.has(d))
+      const pool = eligible.length > 0 ? eligible : entries
+      const [, ref] = pool.reduce((best, cur) => gpsCount(cur) > gpsCount(best) ? cur : best)
+      const pts = ref
+        .filter(p => isFinite(p.x) && isFinite(p.y) && p.relDist >= minRel && p.relDist <= maxRel)
+        .map(p => ({ x: p.x, y: p.y }))
+      if (pts.length >= 10) return pts
+    }
+    return []
   }, [driverTelemetry, totalLaps, pitStops])
 
   // Pit lane path — hybrid detection: use pitStops timestamps as a narrow search window,

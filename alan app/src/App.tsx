@@ -8,6 +8,7 @@ import { loadTrackData, CIRCUIT_TRACK_PREFIX } from './lib/paceData'
 import type { TrackData } from './lib/paceData'
 import { buildDriverSpeedProfiles, getEffectiveLayout, type ProfileData } from './lib/lapPredictor'
 import { computeBattleGaps } from './lib/battleGaps'
+import { driverColor } from './lib/teamColors'
 import { fetchRaceRadio } from './lib/openf1'
 import type { RadioCall } from './lib/openf1'
 import type { BattleGapEntry } from './lib/battleGaps'
@@ -71,6 +72,7 @@ export default function App() {
   const [standingRestartLaps, setStandingRestartLaps] = useState<Set<number>>(new Set())
   const [radioData, setRadioData] = useState<RadioCall[]>([])
   const [tunedDriver, setTunedDriver] = useState<string | null>(null)
+  const [activeRadioCaption, setActiveRadioCaption] = useState<{ driver: string; url: string; text?: string } | null>(null)
 
   const [trackData, setTrackData] = useState<TrackData | null>(null)
 
@@ -195,6 +197,7 @@ export default function App() {
     setStandingRestartLaps(new Set())
     setRadioData([])
     setTunedDriver(null)
+    setActiveRadioCaption(null)
 
     if (!circuit.hasData) {
       setLoading(false)
@@ -644,6 +647,7 @@ export default function App() {
                         radioCallsWithProgress={radioCallsWithProgress.length > 0 ? radioCallsWithProgress : undefined}
                         tunedDriver={tunedDriver}
                         onTuneDriver={setTunedDriver}
+                        onActiveRadioChange={setActiveRadioCaption}
                         loading={loading}
                       />
 
@@ -669,14 +673,28 @@ export default function App() {
                       )}
                     </div>
 
-                    <BattleTracker
-                      drivers={session.drivers.length > 0 ? session.drivers : Object.keys(mergedTelemetry)}
-                      driverTelemetry={mergedTelemetry}
-                      progress={progress}
-                      refLapDuration={refLapDuration}
-                      battleDrivers={battleDrivers}
-                      onChangeBattleDrivers={setBattleDrivers}
-                    />
+                    <div className="right-pane">
+                      <BattleTracker
+                        drivers={session.drivers.length > 0 ? session.drivers : Object.keys(mergedTelemetry)}
+                        driverTelemetry={mergedTelemetry}
+                        progress={progress}
+                        refLapDuration={refLapDuration}
+                        battleDrivers={battleDrivers}
+                        onChangeBattleDrivers={setBattleDrivers}
+                      />
+                      {activeRadioCaption && (
+                        <div className="radio-caption-box" onClick={() => setTunedDriver(tunedDriver === activeRadioCaption.driver ? null : activeRadioCaption.driver)}>
+                          <div className="radio-caption-box-header">
+                            <span className="radio-driver-dot" style={{ background: driverColor(activeRadioCaption.driver) }} />
+                            <span className="radio-driver-name">{activeRadioCaption.driver}</span>
+                            <span className="radio-wave-icon" style={{ marginLeft: 'auto' }}>📻</span>
+                          </div>
+                          {activeRadioCaption.text && (
+                            <div className="radio-caption-box-text">{activeRadioCaption.text}</div>
+                          )}
+                        </div>
+                      )}
+                    </div>
                   </>
                 ) : (
                   <div className="static-track-center">

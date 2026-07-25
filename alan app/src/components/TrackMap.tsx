@@ -72,6 +72,7 @@ interface Props {
   radioCallsWithProgress?: Array<{ driver: string; progress: number; url: string; text?: string }>
   tunedDriver?: string | null
   onTuneDriver?: (driver: string | null) => void
+  onActiveRadioChange?: (call: { driver: string; url: string; text?: string } | null) => void
   loading?: boolean
 }
 
@@ -98,6 +99,7 @@ export default function TrackMap({
   radioCallsWithProgress,
   tunedDriver,
   onTuneDriver,
+  onActiveRadioChange,
   loading = false,
 }: Props) {
   const containerRef = useRef<HTMLDivElement | null>(null)
@@ -154,6 +156,11 @@ export default function TrackMap({
     setActiveRadioCall(null)
     if (radioCallsWithProgress && radioCallsWithProgress.length > 0) setRadioEnabled(true)
   }, [radioCallsWithProgress])
+
+  // Sync active radio call up to parent
+  useEffect(() => {
+    onActiveRadioChange?.(activeRadioCall ?? null)
+  }, [activeRadioCall, onActiveRadioChange])
 
   // Auto-play team radio synchronized to replay progress
   useEffect(() => {
@@ -900,21 +907,13 @@ export default function TrackMap({
             )}
             {radioEnabled && activeRadioCall && (
               <div
-                className={`radio-now-playing ${tunedDriver === activeRadioCall.driver ? 'radio-locked' : ''} ${activeRadioCall.text ? 'radio-has-caption' : ''}`}
+                className={`radio-now-playing ${tunedDriver === activeRadioCall.driver ? 'radio-locked' : ''}`}
                 onClick={() => onTuneDriver?.(tunedDriver === activeRadioCall.driver ? null : activeRadioCall.driver)}
                 title={tunedDriver === activeRadioCall.driver ? 'Click to disconnect' : `Click to lock onto ${activeRadioCall.driver}`}
               >
-                <div className="radio-now-playing-header">
-                  <span
-                    className="radio-driver-dot"
-                    style={{ background: driverColor(activeRadioCall.driver) }}
-                  />
-                  <span className="radio-driver-name">{activeRadioCall.driver}</span>
-                  <span className="radio-wave-icon">📻</span>
-                </div>
-                {activeRadioCall.text && (
-                  <span className="radio-caption">{activeRadioCall.text}</span>
-                )}
+                <span className="radio-driver-dot" style={{ background: driverColor(activeRadioCall.driver) }} />
+                <span className="radio-driver-name">{activeRadioCall.driver}</span>
+                <span className="radio-wave-icon">📻</span>
               </div>
             )}
             {radioEnabled && tunedDriver && !activeRadioCall && (

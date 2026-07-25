@@ -143,7 +143,7 @@ def build_radio_calls(laps, num_to_abbr, raw_radio) -> list:
         except Exception:
             continue
         rel_time = (ts_ms - lights_out_ms) / 1000.0
-        if rel_time < -60 or rel_time > 14400:
+        if rel_time > 14400:
             continue
         calls.append({"driver": abbr, "time": round(rel_time, 2), "url": url})
 

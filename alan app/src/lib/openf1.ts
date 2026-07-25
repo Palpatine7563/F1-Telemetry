@@ -66,7 +66,7 @@ async function fetchRaceRadioFromApi(year: number, raceDate: string): Promise<Ra
       const abbr = numToAbbr[r.driver_number]
       if (!abbr) continue
       const time = (new Date(r.date).getTime() - lightsOutMs) / 1000
-      if (time < -60 || time > 14_400) continue
+      if (time > 14_400) continue
       calls.push({ driver: abbr, time, url: r.recording_url })
     }
 

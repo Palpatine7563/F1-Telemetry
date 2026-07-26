@@ -18,6 +18,10 @@ import type { RaceControlMessage } from './components/TrackMap'
 import TutorialOverlay from './components/TutorialOverlay'
 import type { TutorialStep } from './components/TutorialOverlay'
 import FeedbackButton from './components/FeedbackButton'
+import CommentsPanel from './components/CommentsPanel'
+import AuthModal from './components/AuthModal'
+import { supabase } from './lib/supabase'
+import type { User } from '@supabase/supabase-js'
 import DriverPanel from './components/DriverPanel'
 import MiniSectorTimeline from './components/MiniSectorTimeline'
 import StaticTrackMap from './components/StaticTrackMap'
@@ -79,8 +83,20 @@ export default function App() {
   const [activeRadioCaption, setActiveRadioCaption] = useState<{ driver: string; url: string; text?: string } | null>(null)
   const [raceControlMessages, setRaceControlMessages] = useState<RaceControlMessage[]>([])
   const [tutorialOpen, setTutorialOpen] = useState(() => !localStorage.getItem('f1vis_tour_done'))
+  const [authUser, setAuthUser]         = useState<User | null>(null)
+  const [authModalOpen, setAuthModalOpen] = useState(false)
+  const [commentsOpen, setCommentsOpen]   = useState(false)
 
   const [trackData, setTrackData] = useState<TrackData | null>(null)
+
+  // Supabase auth state
+  useEffect(() => {
+    supabase.auth.getSession().then(({ data }) => setAuthUser(data.session?.user ?? null))
+    const { data: { subscription } } = supabase.auth.onAuthStateChange((_e, session) => {
+      setAuthUser(session?.user ?? null)
+    })
+    return () => subscription.unsubscribe()
+  }, [])
 
   useEffect(() => {
     window.location.hash = activeView === 'telemetry' ? '' : activeView
@@ -612,6 +628,22 @@ export default function App() {
           onClick={() => setTutorialOpen(true)}
           title="Tour the features"
         >?</button>
+        <button
+          className={`comments-toggle-btn ${commentsOpen ? 'active' : ''}`}
+          onClick={() => setCommentsOpen(v => !v)}
+          title="Toggle comments"
+        >
+          💬
+        </button>
+        {authUser ? (
+          <button className="auth-user-btn" onClick={() => supabase.auth.signOut()} title="Sign out">
+            {(authUser.user_metadata?.full_name ?? authUser.email ?? 'User').split(' ')[0]}
+          </button>
+        ) : (
+          <button className="auth-signin-header-btn" onClick={() => setAuthModalOpen(true)}>
+            Sign in
+          </button>
+        )}
         <a href="https://www.buymeacoffee.com/PrivateTiles" target="_blank" rel="noopener noreferrer" className="bmc-btn">
           <img src="https://img.buymeacoffee.com/button-api/?text=Buy me a coffee&emoji=&slug=PrivateTiles&button_colour=FFDD00&font_colour=000000&font_family=Cookie&outline_colour=000000&coffee_colour=ffffff" alt="Buy me a coffee" />
         </a>
@@ -792,6 +824,16 @@ export default function App() {
       </footer>
 
       <FeedbackButton />
+
+      {commentsOpen && (
+        <CommentsPanel
+          circuitId={circuit.id}
+          user={authUser}
+          onSignInClick={() => setAuthModalOpen(true)}
+        />
+      )}
+
+      {authModalOpen && <AuthModal onClose={() => setAuthModalOpen(false)} />}
 
       {tutorialOpen && (
         <TutorialOverlay

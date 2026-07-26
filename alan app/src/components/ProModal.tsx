@@ -1,13 +1,11 @@
 import { useState } from 'react'
 import { supabase } from '../lib/supabase'
-import type { User } from '@supabase/supabase-js'
 
 interface Props {
-  user: User
   onClose: () => void
 }
 
-export default function ProModal({ user, onClose }: Props) {
+export default function ProModal({ onClose }: Props) {
   const [loading, setLoading] = useState(false)
 
   async function handleUpgrade() {

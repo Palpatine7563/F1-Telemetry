@@ -858,8 +858,8 @@ export default function App() {
       )}
 
       {authModalOpen && <AuthModal onClose={() => setAuthModalOpen(false)} />}
-      {proModalOpen && authUser && (
-        <ProModal user={authUser} onClose={() => setProModalOpen(false)} />
+      {proModalOpen && (
+        <ProModal onClose={() => setProModalOpen(false)} />
       )}
 
       {tutorialOpen && (

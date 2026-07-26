@@ -15,10 +15,18 @@ const SVG_W = 900
 const SVG_H = 600
 const PAD = 40
 
-const TRACK_COLOR: Record<string, string> = {
-  'Slow corners': '#e74c3c',
-  'Fast corners': '#27ae60',
-  'Straights':    '#8899aa',
+const TRACK_COLOR_BASE   = '#cccccc'
+const TRACK_COLOR_YELLOW = '#ffcc00'
+const TRACK_COLOR_RED    = '#ff4444'
+
+export interface RaceControlMessage {
+  t:        number
+  category: string
+  flag:     string | null
+  scope:    string | null
+  sector:   number | null
+  status:   string | null
+  msg:      string
 }
 
 interface Transform {
@@ -73,6 +81,7 @@ interface Props {
   tunedDriver?: string | null
   onTuneDriver?: (driver: string | null) => void
   onActiveRadioChange?: (call: { driver: string; url: string; text?: string } | null) => void
+  raceControlMessages?: RaceControlMessage[]
   loading?: boolean
 }
 
@@ -100,6 +109,7 @@ export default function TrackMap({
   tunedDriver,
   onTuneDriver,
   onActiveRadioChange,
+  raceControlMessages,
   loading = false,
 }: Props) {
   const containerRef = useRef<HTMLDivElement | null>(null)
@@ -393,6 +403,85 @@ export default function TrackMap({
     return out
   }, [driverTelemetry, showClip])
 
+  // Current flag state derived from race control messages
+  const currentFlagState = useMemo(() => {
+    const empty = { trackState: 'green' as const, yellowSectors: new Set<number>() }
+    if (!raceControlMessages || raceControlMessages.length === 0) return empty
+
+    const t = progress * refLapDuration
+    let trackState: 'green' | 'yellow' | 'red' | 'sc' | 'vsc' = 'green'
+    const yellowSectors = new Set<number>()
+
+    for (const msg of raceControlMessages) {
+      if (msg.t > t) break
+      if (msg.category === 'SafetyCar') {
+        if (msg.status === 'DEPLOYED') {
+          trackState = msg.msg.includes('VSC') ? 'vsc' : 'sc'
+          yellowSectors.clear()
+        }
+        // ENDING: state persists until TRACK CLEAR
+      } else if (msg.category === 'Flag') {
+        if (msg.flag === 'CLEAR' && msg.scope === 'Track') {
+          trackState = 'green'
+          yellowSectors.clear()
+        } else if (msg.flag === 'RED') {
+          trackState = 'red'
+          yellowSectors.clear()
+        } else if ((msg.flag === 'YELLOW' || msg.flag === 'DOUBLE YELLOW') && msg.scope === 'Sector' && msg.sector) {
+          yellowSectors.add(msg.sector)
+        } else if (msg.flag === 'CLEAR' && msg.scope === 'Sector' && msg.sector) {
+          yellowSectors.delete(msg.sector)
+        }
+      }
+    }
+    return { trackState, yellowSectors }
+  }, [raceControlMessages, progress, refLapDuration])
+
+  // Max sector number for relDist mapping (e.g. circuit has 20 sectors → sector k → [k-1/20, k/20])
+  const maxSector = useMemo(() => {
+    if (!raceControlMessages) return 20
+    return Math.max(20, ...raceControlMessages
+      .filter(m => m.sector != null)
+      .map(m => m.sector as number))
+  }, [raceControlMessages])
+
+  // Cumulative arc-length relDist [0,1] for each trackData segment (for sector yellow mapping)
+  const segmentRelDistRanges = useMemo(() => {
+    if (!trackData || trackData.segments.length === 0) return [] as { start: number; end: number }[]
+    const segLengths = trackData.segments.map(seg => {
+      let len = 0
+      for (let i = 1; i < seg.points.length; i++) {
+        const dx = seg.points[i].x - seg.points[i - 1].x
+        const dy = seg.points[i].y - seg.points[i - 1].y
+        len += Math.sqrt(dx * dx + dy * dy)
+      }
+      return len
+    })
+    const totalLen = segLengths.reduce((a, b) => a + b, 0) || 1
+    let cum = 0
+    return segLengths.map(l => {
+      const start = cum / totalLen
+      cum += l
+      return { start, end: cum / totalLen }
+    })
+  }, [trackData])
+
+  // Returns the appropriate track color for a segment given the current flag state
+  const getSegmentColor = useCallback((segIdx: number): string => {
+    const { trackState, yellowSectors } = currentFlagState
+    if (trackState === 'sc' || trackState === 'vsc') return TRACK_COLOR_YELLOW
+    if (trackState === 'red') return TRACK_COLOR_RED
+    if (yellowSectors.size > 0 && segIdx < segmentRelDistRanges.length) {
+      const { start, end } = segmentRelDistRanges[segIdx]
+      for (const sector of yellowSectors) {
+        const s0 = (sector - 1) / maxSector
+        const s1 = sector / maxSector
+        if (start < s1 && end > s0) return TRACK_COLOR_YELLOW
+      }
+    }
+    return TRACK_COLOR_BASE
+  }, [currentFlagState, segmentRelDistRanges, maxSector])
+
   // Keep progressRef in sync so the RAF tick can read the current value
   useEffect(() => { progressRef.current = progress }, [progress])
 
@@ -489,7 +578,7 @@ export default function TrackMap({
             )
           })}
 
-          {/* 3-class colored track */}
+          {/* Track with race-condition coloring (white default → yellow/red under caution) */}
           {hasData && trackData && (() => {
             const shadow = trackData.segments.map((run, i) => {
               const pts = run.points.map(p => {
@@ -497,43 +586,64 @@ export default function TrackMap({
                 return `${x.toFixed(1)},${y.toFixed(1)}`
               }).join(' ')
               return <polyline key={`sh${i}`} points={pts} fill="none"
-                stroke="#00000060" strokeWidth={14}
+                stroke="#00000080" strokeWidth={14}
                 strokeLinecap="round" strokeLinejoin="round" />
             })
-            const colored = (['Straights', 'Fast corners', 'Slow corners'] as const).flatMap(cat =>
-              trackData.segments
-                .map((run, i) => ({ run, i }))
-                .filter(({ run }) => run.category === cat)
-                .map(({ run, i }) => {
-                  const pts = run.points.map(p => {
-                    const { x, y } = transform.apply(p)
-                    return `${x.toFixed(1)},${y.toFixed(1)}`
-                  }).join(' ')
-                  return (
-                    <polyline key={`${cat}${i}`} points={pts} fill="none"
-                      stroke={TRACK_COLOR[run.category] ?? '#667'}
-                      strokeWidth={4}
-                      strokeLinecap="round" strokeLinejoin="round" />
-                  )
-                })
-            )
+            const colored = trackData.segments.map((run, i) => {
+              const pts = run.points.map(p => {
+                const { x, y } = transform.apply(p)
+                return `${x.toFixed(1)},${y.toFixed(1)}`
+              }).join(' ')
+              return (
+                <polyline key={`seg${i}`} points={pts} fill="none"
+                  stroke={getSegmentColor(i)}
+                  strokeWidth={4}
+                  strokeLinecap="round" strokeLinejoin="round" />
+              )
+            })
             return <>{shadow}{colored}</>
           })()}
 
           {/* Fallback plain track when no 3-class data */}
-          {hasData && !trackData && (
-            <>
-              <path d={pointsToPath(transformedPoints)} fill="none"
-                stroke="#ffffff18" strokeWidth={18}
-                strokeLinecap="round" strokeLinejoin="round" />
-              <path d={pointsToPath(transformedPoints)} fill="none"
-                stroke="#e10600" strokeWidth={4}
-                strokeLinecap="round" strokeLinejoin="round" />
-              <path d={pointsToPath(transformedPoints)} fill="none"
-                stroke="#ff6b6b" strokeWidth={1.5}
-                strokeLinecap="round" strokeLinejoin="round" strokeOpacity={0.6} />
-            </>
-          )}
+          {hasData && !trackData && (() => {
+            const { trackState } = currentFlagState
+            const fallbackColor = trackState === 'red' ? TRACK_COLOR_RED
+              : (trackState === 'sc' || trackState === 'vsc') ? TRACK_COLOR_YELLOW
+              : TRACK_COLOR_BASE
+            return (
+              <>
+                <path d={pointsToPath(transformedPoints)} fill="none"
+                  stroke="#00000080" strokeWidth={18}
+                  strokeLinecap="round" strokeLinejoin="round" />
+                <path d={pointsToPath(transformedPoints)} fill="none"
+                  stroke={fallbackColor} strokeWidth={4}
+                  strokeLinecap="round" strokeLinejoin="round" />
+              </>
+            )
+          })()}
+
+          {/* Race control flag badge (top-left of SVG) */}
+          {hasData && raceControlMessages && (() => {
+            const { trackState, yellowSectors } = currentFlagState
+            if (trackState === 'green' && yellowSectors.size === 0) return null
+            const isYellow = trackState === 'sc' || trackState === 'vsc' || yellowSectors.size > 0
+            const bgColor   = isYellow ? '#ffcc00' : '#ff4444'
+            const textColor = isYellow ? '#000000' : '#ffffff'
+            const label     = trackState === 'sc' ? 'SC' : trackState === 'vsc' ? 'VSC'
+              : trackState === 'red' ? 'RED FLAG'
+              : yellowSectors.size > 0 ? `YELLOW S${[...yellowSectors].sort((a,b)=>a-b).join(',')}`
+              : 'YELLOW'
+            const w = Math.max(50, label.length * 7 + 16)
+            return (
+              <g>
+                <rect x={10} y={10} width={w} height={22} rx={4} fill={bgColor} fillOpacity={0.92} />
+                <text x={10 + w / 2} y={25} textAnchor="middle"
+                  fill={textColor} fontSize={11} fontWeight="bold" fontFamily="monospace">
+                  {label}
+                </text>
+              </g>
+            )
+          })()}
 
           {/* Start/finish marker */}
           {hasData && (() => {

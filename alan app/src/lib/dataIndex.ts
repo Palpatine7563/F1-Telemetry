@@ -145,3 +145,7 @@ export function fullRaceUrl(circuitId: string, year: number, sessionFolder = 'ra
 export function teamRadioUrl(circuitId: string, year: number, sessionFolder = 'race'): string {
   return `/data/FastF1%20Data/fastf1_${year}_${circuitFolder(circuitId)}_grand_prix/${sessionFolder}/team_radio.json`
 }
+
+export function raceControlUrl(circuitId: string, year: number, sessionFolder = 'race'): string {
+  return `/data/FastF1%20Data/fastf1_${year}_${circuitFolder(circuitId)}_grand_prix/${sessionFolder}/race_control_messages.json`
+}

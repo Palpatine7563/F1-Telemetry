@@ -1,6 +1,6 @@
 import { useState, useEffect, useMemo, useCallback, useRef } from 'react'
 import type { CircuitConfig, CircuitSession, TelemetryPoint, ColorMode } from './types'
-import { CIRCUITS, telemetryUrl, fullRaceUrl, teamRadioUrl } from './lib/dataIndex'
+import { CIRCUITS, telemetryUrl, fullRaceUrl, teamRadioUrl, raceControlUrl } from './lib/dataIndex'
 import { loadAllDriverTelemetry, loadTelemetryFromFile, loadFullRaceTelemetry } from './lib/csvLoader'
 import type { SafetyCarPeriod, StintInfo, PitStopInfo, OvertakeEvent } from './lib/csvLoader'
 import { computeMiniSectors, computeMiniSectorsFromSegments } from './lib/miniSectors'
@@ -14,6 +14,7 @@ import type { RadioCall } from './lib/openf1'
 import type { BattleGapEntry } from './lib/battleGaps'
 import CircuitSelector from './components/CircuitSelector'
 import TrackMap from './components/TrackMap'
+import type { RaceControlMessage } from './components/TrackMap'
 import DriverPanel from './components/DriverPanel'
 import MiniSectorTimeline from './components/MiniSectorTimeline'
 import StaticTrackMap from './components/StaticTrackMap'
@@ -73,6 +74,7 @@ export default function App() {
   const [radioData, setRadioData] = useState<RadioCall[]>([])
   const [tunedDriver, setTunedDriver] = useState<string | null>(null)
   const [activeRadioCaption, setActiveRadioCaption] = useState<{ driver: string; url: string; text?: string } | null>(null)
+  const [raceControlMessages, setRaceControlMessages] = useState<RaceControlMessage[]>([])
 
   const [trackData, setTrackData] = useState<TrackData | null>(null)
 
@@ -198,6 +200,7 @@ export default function App() {
     setRadioData([])
     setTunedDriver(null)
     setActiveRadioCaption(null)
+    setRaceControlMessages([])
 
     if (!circuit.hasData) {
       setLoading(false)
@@ -223,6 +226,11 @@ export default function App() {
       }).catch(() => setLoading(false))
       // Radio loads independently — prefers local cache, falls back to live OpenF1 API
       fetchRaceRadio(year, circuit.raceDate, teamRadioUrl(circuit.id, year)).then(setRadioData).catch(() => {})
+      // Race control messages
+      fetch(raceControlUrl(circuit.id, year))
+        .then(r => r.ok ? r.json() : [])
+        .then(setRaceControlMessages)
+        .catch(() => {})
       return
     }
 
@@ -648,6 +656,7 @@ export default function App() {
                         tunedDriver={tunedDriver}
                         onTuneDriver={setTunedDriver}
                         onActiveRadioChange={setActiveRadioCaption}
+                        raceControlMessages={raceControlMessages.length > 0 ? raceControlMessages : undefined}
                         loading={loading}
                       />
 

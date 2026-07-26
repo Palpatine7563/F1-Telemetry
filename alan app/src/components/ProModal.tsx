@@ -10,21 +10,27 @@ export default function ProModal({ onClose }: Props) {
 
   async function handleUpgrade() {
     setLoading(true)
-    const { data: { session } } = await supabase.auth.getSession()
-    const res = await fetch(
-      'https://btdwvnanskfdgiaiadwc.supabase.co/functions/v1/create-checkout',
-      {
-        method:  'POST',
-        headers: {
-          'Content-Type':  'application/json',
-          'Authorization': `Bearer ${session?.access_token}`,
+    try {
+      const { data: { session } } = await supabase.auth.getSession()
+      const res = await fetch(
+        'https://btdwvnanskfdgiaiadwc.supabase.co/functions/v1/create-checkout',
+        {
+          method:  'POST',
+          headers: {
+            'Content-Type':  'application/json',
+            'Authorization': `Bearer ${session?.access_token}`,
+          },
+          body: JSON.stringify({ origin: window.location.origin }),
         },
-        body: JSON.stringify({ origin: window.location.origin }),
-      },
-    )
-    const { url, error } = await res.json()
-    if (error) { setLoading(false); return }
-    window.location.href = url
+      )
+      const json = await res.json()
+      console.log('Checkout response:', json)
+      if (!json.url) { setLoading(false); return }
+      window.location.href = json.url
+    } catch (err) {
+      console.error('Checkout error:', err)
+      setLoading(false)
+    }
   }
 
   return (

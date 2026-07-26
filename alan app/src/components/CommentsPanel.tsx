@@ -1,19 +1,31 @@
 import { useState, useEffect, useRef } from 'react'
 import type { User } from '@supabase/supabase-js'
 import { supabase } from '../lib/supabase'
-import type { Comment } from '../lib/supabase'
+import type { Comment, Profile } from '../lib/supabase'
 
 interface Props {
   circuitId: string
   user: User | null
+  profile: Profile | null
   onSignInClick: () => void
+  onUpgradeClick: () => void
+  onProfileUpdate: (p: Profile) => void
 }
 
-export default function CommentsPanel({ circuitId, user, onSignInClick }: Props) {
-  const [comments, setComments]   = useState<Comment[]>([])
-  const [text, setText]           = useState('')
+const PRESET_COLORS = [
+  '#ffffff', '#ff4444', '#ff9900', '#ffcc00',
+  '#44ff88', '#00ccff', '#aa66ff', '#ff66cc',
+]
+
+export default function CommentsPanel({ circuitId, user, profile, onSignInClick, onUpgradeClick, onProfileUpdate }: Props) {
+  const [comments, setComments]     = useState<Comment[]>([])
+  const [text, setText]             = useState('')
   const [submitting, setSubmitting] = useState(false)
-  const bottomRef                 = useRef<HTMLDivElement>(null)
+  const [showColors, setShowColors] = useState(false)
+  const bottomRef                   = useRef<HTMLDivElement>(null)
+
+  const isPro = profile?.tier === 'pro'
+  const myColor = profile?.comment_color ?? '#ffffff'
 
   // Load comments for this circuit
   useEffect(() => {
@@ -48,10 +60,21 @@ export default function CommentsPanel({ circuitId, user, onSignInClick }: Props)
     return () => { supabase.removeChannel(channel) }
   }, [circuitId])
 
-  // Scroll to bottom when new comments arrive
   useEffect(() => {
     bottomRef.current?.scrollIntoView({ behavior: 'smooth' })
   }, [comments.length])
+
+  async function handleColorSelect(color: string) {
+    if (!user) return
+    const { data } = await supabase
+      .from('profiles')
+      .update({ comment_color: color })
+      .eq('id', user.id)
+      .select()
+      .single()
+    if (data) onProfileUpdate(data as Profile)
+    setShowColors(false)
+  }
 
   async function handleSubmit() {
     if (!text.trim() || !user || submitting) return
@@ -61,10 +84,11 @@ export default function CommentsPanel({ circuitId, user, onSignInClick }: Props)
       ?? user.email?.split('@')[0]
       ?? 'Anonymous'
     const { data, error } = await supabase.from('comments').insert({
-      user_id:    user.id,
-      circuit_id: circuitId,
-      text:       text.trim(),
+      user_id:       user.id,
+      circuit_id:    circuitId,
+      text:          text.trim(),
       username,
+      comment_color: isPro ? myColor : null,
     }).select().single()
     if (error) {
       console.error('Comment insert failed:', error)
@@ -90,7 +114,28 @@ export default function CommentsPanel({ circuitId, user, onSignInClick }: Props)
       <div className="comments-header">
         <span className="comments-title">Comments</span>
         <span className="comments-live-dot" title="Live" />
+        {isPro && (
+          <button
+            className="comments-color-trigger"
+            style={{ background: myColor }}
+            onClick={() => setShowColors(v => !v)}
+            title="Change comment color"
+          />
+        )}
       </div>
+
+      {showColors && (
+        <div className="comments-color-picker">
+          {PRESET_COLORS.map(c => (
+            <button
+              key={c}
+              className={`color-swatch ${myColor === c ? 'active' : ''}`}
+              style={{ background: c }}
+              onClick={() => handleColorSelect(c)}
+            />
+          ))}
+        </div>
+      )}
 
       <div className="comments-list">
         {comments.length === 0 && (
@@ -105,7 +150,12 @@ export default function CommentsPanel({ circuitId, user, onSignInClick }: Props)
                 <button className="comment-delete" onClick={() => handleDelete(c.id)} title="Delete">✕</button>
               )}
             </div>
-            <div className="comment-text">{c.text}</div>
+            <div
+              className="comment-text"
+              style={c.comment_color ? { color: c.comment_color } : undefined}
+            >
+              {c.text}
+            </div>
           </div>
         ))}
         <div ref={bottomRef} />
@@ -133,6 +183,11 @@ export default function CommentsPanel({ circuitId, user, onSignInClick }: Props)
                 Post
               </button>
             </div>
+            {!isPro && (
+              <button className="comments-go-pro" onClick={onUpgradeClick}>
+                ✦ Go Pro — custom color & more
+              </button>
+            )}
           </>
         ) : (
           <button className="comments-signin-btn" onClick={onSignInClick}>

@@ -20,7 +20,9 @@ import type { TutorialStep } from './components/TutorialOverlay'
 import FeedbackButton from './components/FeedbackButton'
 import CommentsPanel from './components/CommentsPanel'
 import AuthModal from './components/AuthModal'
+import ProModal from './components/ProModal'
 import { supabase } from './lib/supabase'
+import type { Profile } from './lib/supabase'
 import type { User } from '@supabase/supabase-js'
 import DriverPanel from './components/DriverPanel'
 import MiniSectorTimeline from './components/MiniSectorTimeline'
@@ -84,7 +86,9 @@ export default function App() {
   const [raceControlMessages, setRaceControlMessages] = useState<RaceControlMessage[]>([])
   const [tutorialOpen, setTutorialOpen] = useState(() => !localStorage.getItem('f1vis_tour_done'))
   const [authUser, setAuthUser]         = useState<User | null>(null)
+  const [profile, setProfile]           = useState<Profile | null>(null)
   const [authModalOpen, setAuthModalOpen] = useState(false)
+  const [proModalOpen, setProModalOpen]   = useState(false)
   const [commentsOpen, setCommentsOpen]   = useState(false)
 
   const [trackData, setTrackData] = useState<TrackData | null>(null)
@@ -97,6 +101,23 @@ export default function App() {
     })
     return () => subscription.unsubscribe()
   }, [])
+
+  // Load profile whenever user changes
+  useEffect(() => {
+    if (!authUser) { setProfile(null); return }
+    supabase.from('profiles').select('*').eq('id', authUser.id).single()
+      .then(({ data }) => { if (data) setProfile(data as Profile) })
+  }, [authUser])
+
+  // Handle post-checkout redirect
+  useEffect(() => {
+    const params = new URLSearchParams(window.location.search)
+    if (params.get('pro') === '1' && authUser) {
+      supabase.from('profiles').select('*').eq('id', authUser.id).single()
+        .then(({ data }) => { if (data) setProfile(data as Profile) })
+      window.history.replaceState({}, '', window.location.pathname)
+    }
+  }, [authUser])
 
   useEffect(() => {
     window.location.hash = activeView === 'telemetry' ? '' : activeView
@@ -829,11 +850,17 @@ export default function App() {
         <CommentsPanel
           circuitId={circuit.id}
           user={authUser}
+          profile={profile}
           onSignInClick={() => setAuthModalOpen(true)}
+          onUpgradeClick={() => setProModalOpen(true)}
+          onProfileUpdate={setProfile}
         />
       )}
 
       {authModalOpen && <AuthModal onClose={() => setAuthModalOpen(false)} />}
+      {proModalOpen && authUser && (
+        <ProModal user={authUser} onClose={() => setProModalOpen(false)} />
+      )}
 
       {tutorialOpen && (
         <TutorialOverlay

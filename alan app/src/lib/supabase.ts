@@ -13,4 +13,12 @@ export type Comment = {
   race_time: number | null
   text: string
   username: string
+  comment_color?: string | null
+}
+
+export type Profile = {
+  id: string
+  tier: 'free' | 'pro'
+  comment_color: string | null
+  stripe_customer_id: string | null
 }

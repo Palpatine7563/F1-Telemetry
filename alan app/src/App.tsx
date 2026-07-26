@@ -17,6 +17,7 @@ import TrackMap from './components/TrackMap'
 import type { RaceControlMessage } from './components/TrackMap'
 import TutorialOverlay from './components/TutorialOverlay'
 import type { TutorialStep } from './components/TutorialOverlay'
+import FeedbackButton from './components/FeedbackButton'
 import DriverPanel from './components/DriverPanel'
 import MiniSectorTimeline from './components/MiniSectorTimeline'
 import StaticTrackMap from './components/StaticTrackMap'
@@ -554,7 +555,6 @@ export default function App() {
       selector: '.track-map-container',
       title: 'Live track map',
       body: "Every car moves around the circuit in real time. Colored dots show each driver's position. Hover to highlight, click to lock on.",
-      placement: 'right',
     },
     {
       selector: '.playback-bar',
@@ -790,6 +790,8 @@ export default function App() {
         <span className="footer-sep">·</span>
         <span className="footer-legal">This website is unofficial and is not associated in any way with the Formula 1 companies. F1, FORMULA ONE, FORMULA 1, FIA FORMULA ONE WORLD CHAMPIONSHIP, GRAND PRIX and related marks are trade marks of Formula One Licensing B.V.</span>
       </footer>
+
+      <FeedbackButton />
 
       {tutorialOpen && (
         <TutorialOverlay

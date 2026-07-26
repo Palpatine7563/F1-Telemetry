@@ -58,11 +58,13 @@ export default function TutorialOverlay({ steps, onClose }: Props) {
       })
       return
     }
+    // Auto-detect placement using actual available space
+    const spaceBelow = vh - (spotRect.top + spotRect.height)
+    const spaceAbove = spotRect.top
+    const spaceRight = vw - (spotRect.left + spotRect.width)
+    const spaceLeft  = spotRect.left
+
     const placement = step.placement ?? (() => {
-      const spaceBelow = vh - (spotRect.top + spotRect.height)
-      const spaceAbove = spotRect.top
-      const spaceRight = vw - (spotRect.left + spotRect.width)
-      const spaceLeft  = spotRect.left
       if (spaceBelow >= 180) return 'bottom'
       if (spaceAbove >= 180) return 'top'
       if (spaceRight >= CARD_W + CARD_MARGIN) return 'right'
@@ -70,27 +72,45 @@ export default function TutorialOverlay({ steps, onClose }: Props) {
       return 'bottom'
     })()
 
+    // If the explicit placement has no room, flip to the side with most space
+    const resolvedPlacement = (() => {
+      if (placement === 'right' && spaceRight < CARD_W + CARD_MARGIN) {
+        if (spaceLeft >= CARD_W + CARD_MARGIN) return 'left'
+        if (spaceBelow >= 180) return 'bottom'
+        return 'top'
+      }
+      if (placement === 'left' && spaceLeft < CARD_W + CARD_MARGIN) {
+        if (spaceRight >= CARD_W + CARD_MARGIN) return 'right'
+        if (spaceBelow >= 180) return 'bottom'
+        return 'top'
+      }
+      return placement
+    })()
+
     let top = 0, left = 0
     const centerX = spotRect.left + spotRect.width  / 2
     const centerY = spotRect.top  + spotRect.height / 2
 
-    if (placement === 'bottom') {
+    if (resolvedPlacement === 'bottom') {
       top  = spotRect.top + spotRect.height + CARD_MARGIN
-      left = Math.min(vw - CARD_W - 12, Math.max(12, centerX - CARD_W / 2))
-    } else if (placement === 'top') {
-      top  = spotRect.top - CARD_MARGIN - 160  // rough card height
-      left = Math.min(vw - CARD_W - 12, Math.max(12, centerX - CARD_W / 2))
-      top  = Math.max(12, top)
-    } else if (placement === 'right') {
-      top  = Math.min(vh - 160, Math.max(12, centerY - 80))
+      left = centerX - CARD_W / 2
+    } else if (resolvedPlacement === 'top') {
+      top  = spotRect.top - CARD_MARGIN - 160
+      left = centerX - CARD_W / 2
+    } else if (resolvedPlacement === 'right') {
+      top  = centerY - 80
       left = spotRect.left + spotRect.width + CARD_MARGIN
-    } else if (placement === 'left') {
-      top  = Math.min(vh - 160, Math.max(12, centerY - 80))
+    } else if (resolvedPlacement === 'left') {
+      top  = centerY - 80
       left = spotRect.left - CARD_MARGIN - CARD_W
     } else {
       top  = Math.round(vh / 2 - 120)
       left = Math.round(vw / 2 - CARD_W / 2)
     }
+
+    // Hard clamp — card must never leave the viewport
+    top  = Math.max(8, Math.min(vh - 240, top))
+    left = Math.max(8, Math.min(vw - CARD_W - 8, left))
 
     setCardPos({ top, left })
   }, [spotRect, step.placement])

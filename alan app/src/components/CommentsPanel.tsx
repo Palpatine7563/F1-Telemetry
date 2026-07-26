@@ -33,7 +33,11 @@ export default function CommentsPanel({ circuitId, user, onSignInClick }: Props)
       .on(
         'postgres_changes',
         { event: 'INSERT', schema: 'public', table: 'comments', filter: `circuit_id=eq.${circuitId}` },
-        payload => setComments(prev => [...prev, payload.new as Comment]),
+        payload => setComments(prev =>
+          prev.some(c => c.id === (payload.new as Comment).id)
+            ? prev
+            : [...prev, payload.new as Comment]
+        ),
       )
       .on(
         'postgres_changes',
@@ -56,12 +60,18 @@ export default function CommentsPanel({ circuitId, user, onSignInClick }: Props)
       ?? user.user_metadata?.user_name
       ?? user.email?.split('@')[0]
       ?? 'Anonymous'
-    await supabase.from('comments').insert({
+    const { data, error } = await supabase.from('comments').insert({
       user_id:    user.id,
       circuit_id: circuitId,
       text:       text.trim(),
       username,
-    })
+    }).select().single()
+    if (error) {
+      console.error('Comment insert failed:', error)
+      setSubmitting(false)
+      return
+    }
+    setComments(prev => [...prev, data as Comment])
     setText('')
     setSubmitting(false)
   }

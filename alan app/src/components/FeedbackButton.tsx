@@ -44,7 +44,7 @@ export default function FeedbackButton() {
     const body    = encodeURIComponent(
       `${message.trim()}\n\n---\nURL: ${window.location.href}`
     )
-    window.open(`mailto:caichaochao@gmail.com?subject=${subject}&body=${body}`)
+    window.open(`mailto:privatetiles@gmail.com?subject=${subject}&body=${body}`)
     setSent(true)
     setTimeout(() => {
       setOpen(false)

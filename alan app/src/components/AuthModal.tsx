@@ -8,14 +8,14 @@ export default function AuthModal({ onClose }: Props) {
   async function signInWithGoogle() {
     await supabase.auth.signInWithOAuth({
       provider: 'google',
-      options: { redirectTo: window.location.href },
+      options: { redirectTo: window.location.origin },
     })
   }
 
   async function signInWithGitHub() {
     await supabase.auth.signInWithOAuth({
       provider: 'github',
-      options: { redirectTo: window.location.href },
+      options: { redirectTo: window.location.origin },
     })
   }
 

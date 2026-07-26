@@ -3200,3 +3200,152 @@
   /* Hide SVG gap labels on mobile — unreadable at 40% scale; battle panel shows the data instead */
   .battle-gap-label { display: none; }
 }
+
+/* ── Tutorial Overlay ── */
+.tutorial-root {
+  position: fixed;
+  inset: 0;
+  z-index: 9990;
+  pointer-events: none;
+}
+
+/* Spotlight: the visible "hole" — box-shadow creates the dark backdrop */
+.tutorial-spotlight {
+  position: fixed;
+  border-radius: 8px;
+  box-shadow:
+    0 0 0 3px #e10600,
+    0 0 0 3000px rgba(0, 0, 0, 0.72);
+  pointer-events: none;
+  transition: top 0.25s ease, left 0.25s ease, width 0.25s ease, height 0.25s ease;
+  z-index: 9991;
+}
+
+/* Plain backdrop for center/no-selector steps */
+.tutorial-backdrop {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.72);
+  pointer-events: none;
+  z-index: 9991;
+}
+
+/* Info card */
+.tutorial-card {
+  position: fixed;
+  background: #0d1520;
+  border: 1px solid #1e2a3a;
+  border-radius: 10px;
+  padding: 18px 20px 14px;
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.6);
+  pointer-events: all;
+  z-index: 9995;
+  transition: top 0.25s ease, left 0.25s ease;
+}
+
+.tutorial-step-counter {
+  font-size: 10px;
+  color: #556;
+  font-family: 'JetBrains Mono', monospace;
+  margin-bottom: 8px;
+  letter-spacing: 0.05em;
+}
+
+.tutorial-title {
+  font-size: 15px;
+  font-weight: 700;
+  color: #e0e8f8;
+  margin-bottom: 8px;
+  line-height: 1.3;
+}
+
+.tutorial-body {
+  font-size: 13px;
+  color: #8899bb;
+  line-height: 1.6;
+  margin-bottom: 16px;
+}
+
+.tutorial-actions {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+}
+
+.tutorial-skip {
+  background: none;
+  border: none;
+  color: #445;
+  font-size: 12px;
+  cursor: pointer;
+  padding: 0;
+  transition: color 0.15s;
+}
+.tutorial-skip:hover { color: #778; }
+
+.tutorial-nav {
+  display: flex;
+  gap: 8px;
+  align-items: center;
+}
+
+.tutorial-btn {
+  background: #e10600;
+  border: none;
+  border-radius: 6px;
+  color: #fff;
+  font-size: 13px;
+  font-weight: 600;
+  padding: 7px 16px;
+  cursor: pointer;
+  transition: background 0.15s;
+}
+.tutorial-btn:hover { background: #c00400; }
+
+.tutorial-btn-prev {
+  background: #1a2030;
+  color: #8899bb;
+}
+.tutorial-btn-prev:hover { background: #232d40; }
+
+.tutorial-dots {
+  display: flex;
+  gap: 6px;
+  justify-content: center;
+  margin-top: 14px;
+}
+
+.tutorial-dot {
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  background: #1e2a3a;
+  border: 1px solid #2a3a50;
+  cursor: pointer;
+  padding: 0;
+  transition: background 0.15s, border-color 0.15s;
+}
+.tutorial-dot.active {
+  background: #e10600;
+  border-color: #e10600;
+}
+.tutorial-dot:hover:not(.active) { background: #2a3a50; }
+
+/* Tutorial trigger button in header */
+.tutorial-trigger {
+  background: none;
+  border: 1px solid #334;
+  color: #778;
+  border-radius: 50%;
+  width: 24px;
+  height: 24px;
+  font-size: 13px;
+  font-weight: 700;
+  cursor: pointer;
+  line-height: 1;
+  transition: border-color 0.15s, color 0.15s;
+  flex-shrink: 0;
+  margin-right: 8px;
+}
+.tutorial-trigger:hover { border-color: #e10600; color: #e10600; }

@@ -15,6 +15,8 @@ import type { BattleGapEntry } from './lib/battleGaps'
 import CircuitSelector from './components/CircuitSelector'
 import TrackMap from './components/TrackMap'
 import type { RaceControlMessage } from './components/TrackMap'
+import TutorialOverlay from './components/TutorialOverlay'
+import type { TutorialStep } from './components/TutorialOverlay'
 import DriverPanel from './components/DriverPanel'
 import MiniSectorTimeline from './components/MiniSectorTimeline'
 import StaticTrackMap from './components/StaticTrackMap'
@@ -75,6 +77,7 @@ export default function App() {
   const [tunedDriver, setTunedDriver] = useState<string | null>(null)
   const [activeRadioCaption, setActiveRadioCaption] = useState<{ driver: string; url: string; text?: string } | null>(null)
   const [raceControlMessages, setRaceControlMessages] = useState<RaceControlMessage[]>([])
+  const [tutorialOpen, setTutorialOpen] = useState(() => !localStorage.getItem('f1vis_tour_done'))
 
   const [trackData, setTrackData] = useState<TrackData | null>(null)
 
@@ -529,6 +532,61 @@ export default function App() {
 
   void getEffectiveLayout(circuit.id, driverProfiles)  // keep profiles warm as backup
 
+  const TUTORIAL_STEPS: TutorialStep[] = [
+    {
+      title: 'Welcome to F1 Telemetry Visualizer',
+      body: "Real race data, replayed lap by lap. This quick tour covers the key features — takes about 30 seconds.",
+      placement: 'center',
+    },
+    {
+      selector: '.circuit-selector',
+      title: 'Pick a race',
+      body: "Choose a season, then a circuit. Full-race replays are available for highlighted rounds. The countdown shows the next upcoming GP.",
+      placement: 'bottom',
+    },
+    {
+      selector: '.driver-panel',
+      title: 'Driver panel',
+      body: "Toggle drivers on or off. Click a name to highlight that driver on the track. The Solo button focuses on one driver at a time.",
+      placement: 'right',
+    },
+    {
+      selector: '.track-map-container',
+      title: 'Live track map',
+      body: "Every car moves around the circuit in real time. Colored dots show each driver's position. Hover to highlight, click to lock on.",
+      placement: 'right',
+    },
+    {
+      selector: '.playback-bar',
+      title: 'Playback controls',
+      body: "Play, pause, and scrub through the race. Speed up to 30× or 60× to skim the whole race. The colored bands on the timeline show safety car periods.",
+      placement: 'top',
+    },
+    {
+      selector: '.battle-panel',
+      title: 'Battle tracker',
+      body: "Add up to 5 drivers to track their live gaps. The number shows how many seconds separate them — great for following a wheel-to-wheel fight.",
+      placement: 'left',
+    },
+    {
+      selector: '.playback-bar',
+      title: 'Team radio',
+      body: "Press the 📻 button to enable synchronized team radio. Real clips from drivers and engineers play at the exact moment they happened in the race.",
+      placement: 'top',
+    },
+    {
+      title: 'Track flag states',
+      body: "The track turns yellow during VSC or Safety Car periods, with specific sectors highlighted for local yellow flags. Red flag = full red track. It resets white when the track is clear.",
+      placement: 'center',
+    },
+    {
+      selector: '.app-header',
+      title: "That's it!",
+      body: "Explore Pace Analysis, Standings, and Calendar in the sidebar. Drop a CSV file anywhere to load custom telemetry. Enjoy the data! 🏎️",
+      placement: 'bottom',
+    },
+  ]
+
   return (
     <div
       className="app"
@@ -549,6 +607,11 @@ export default function App() {
           <span className="logo-text">Telemetry Visualizer</span>
         </div>
         {loading && activeView === 'telemetry' && <span className="loading-badge">Loading…</span>}
+        <button
+          className="tutorial-trigger"
+          onClick={() => setTutorialOpen(true)}
+          title="Tour the features"
+        >?</button>
         <a href="https://www.buymeacoffee.com/PrivateTiles" target="_blank" rel="noopener noreferrer" className="bmc-btn">
           <img src="https://img.buymeacoffee.com/button-api/?text=Buy me a coffee&emoji=&slug=PrivateTiles&button_colour=FFDD00&font_colour=000000&font_family=Cookie&outline_colour=000000&coffee_colour=ffffff" alt="Buy me a coffee" />
         </a>
@@ -727,6 +790,16 @@ export default function App() {
         <span className="footer-sep">·</span>
         <span className="footer-legal">This website is unofficial and is not associated in any way with the Formula 1 companies. F1, FORMULA ONE, FORMULA 1, FIA FORMULA ONE WORLD CHAMPIONSHIP, GRAND PRIX and related marks are trade marks of Formula One Licensing B.V.</span>
       </footer>
+
+      {tutorialOpen && (
+        <TutorialOverlay
+          steps={TUTORIAL_STEPS}
+          onClose={() => {
+            setTutorialOpen(false)
+            localStorage.setItem('f1vis_tour_done', '1')
+          }}
+        />
+      )}
     </div>
   )
 }

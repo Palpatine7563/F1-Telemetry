@@ -1,5 +1,7 @@
 import { useState, useRef, useEffect } from 'react'
 
+const SHEETS_URL = 'https://script.google.com/macros/s/AKfycbwMeaEG79AvBdxlpOilHIbQja5eEw0xBcKRjoqZsOPR1LQkjZHdJpNJc8DdF1dqLU5lhg/exec'
+
 type FeedbackType = 'bug' | 'suggestion' | 'other'
 
 const TYPE_LABELS: Record<FeedbackType, string> = {
@@ -40,11 +42,16 @@ export default function FeedbackButton() {
 
   function handleSubmit() {
     if (!message.trim()) return
-    const subject = encodeURIComponent(`[f1vis] ${TYPE_LABELS[type]}`)
-    const body    = encodeURIComponent(
-      `${message.trim()}\n\n---\nURL: ${window.location.href}`
-    )
-    window.open(`mailto:privatetiles@gmail.com?subject=${subject}&body=${body}`)
+    fetch(SHEETS_URL, {
+      method:  'POST',
+      mode:    'no-cors',
+      headers: { 'Content-Type': 'application/json' },
+      body:    JSON.stringify({
+        type:    TYPE_LABELS[type],
+        message: message.trim(),
+        url:     window.location.href,
+      }),
+    }).catch(() => {})
     setSent(true)
     setTimeout(() => {
       setOpen(false)
@@ -61,7 +68,7 @@ export default function FeedbackButton() {
         {sent ? (
           <div className="fb-sent">
             <span className="fb-sent-check">✓</span>
-            <span>Opening your email client…</span>
+            <span>Feedback sent — thanks!</span>
           </div>
         ) : (
           <>

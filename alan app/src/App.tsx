@@ -105,7 +105,7 @@ export default function App() {
   // Load profile whenever user changes
   useEffect(() => {
     if (!authUser) { setProfile(null); return }
-    supabase.from('profiles').select('*').eq('id', authUser.id).single()
+    supabase.from('profiles').select('*').eq('id', authUser.id).maybeSingle()
       .then(({ data }) => { if (data) setProfile(data as Profile) })
   }, [authUser])
 
@@ -113,7 +113,7 @@ export default function App() {
   useEffect(() => {
     const params = new URLSearchParams(window.location.search)
     if (params.get('pro') === '1' && authUser) {
-      supabase.from('profiles').select('*').eq('id', authUser.id).single()
+      supabase.from('profiles').select('*').eq('id', authUser.id).maybeSingle()
         .then(({ data }) => { if (data) setProfile(data as Profile) })
       window.history.replaceState({}, '', window.location.pathname)
     }

@@ -13,7 +13,7 @@ export default function ProModal({ onClose }: Props) {
     try {
       const { data: { session } } = await supabase.auth.getSession()
       const res = await fetch(
-        'https://btdwvnanskfdgiaiadwc.supabase.co/functions/v1/create-checkout',
+        'https://btdwvnanskfdgiaiadwc.supabase.co/functions/v1/bright-task',
         {
           method:  'POST',
           headers: {

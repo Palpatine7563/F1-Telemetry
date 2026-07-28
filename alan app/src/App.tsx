@@ -61,7 +61,7 @@ export default function App() {
   const [colorMode, setColorMode] = useState<ColorMode>('speed')
   const [progress, setProgress] = useState(0)
   const [playing, setPlaying] = useState(false)
-  const VALID_VIEWS: AppView[] = ['telemetry', 'standings', 'calendar', 'results', 'drivers', 'teams', 'circuits', 'pace', 'pace2', 'insights', 'challenge', 'historicalraces', 'privacy', 'about', 'disclaimer']
+  const VALID_VIEWS: AppView[] = ['telemetry', 'standings', 'calendar', 'results', 'drivers', 'teams', 'circuits', 'pace', 'pace2', 'insights', 'challenge', 'historicalraces', 'privacy', 'about', 'disclaimer', 'changelog']
   const hashToView = (hash: string): AppView => {
     const v = hash.replace(/^#\/?/, '') as AppView
     return VALID_VIEWS.includes(v) ? v : 'telemetry'

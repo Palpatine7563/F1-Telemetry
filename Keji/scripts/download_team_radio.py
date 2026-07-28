@@ -53,6 +53,7 @@ RACES = [
     ("fastf1_2026_austrian_grand_prix",    "race", 2026, "2026-06-28", "Race"),
     ("fastf1_2026_british_grand_prix",     "race", 2026, "2026-07-05", "Race"),
     ("fastf1_2026_belgian_grand_prix",     "race", 2026, "2026-07-19", "Race"),
+    ("fastf1_2026_hungarian_grand_prix",   "race", 2026, "2026-07-26", "Race"),
 ]
 
 

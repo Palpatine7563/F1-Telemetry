@@ -54,6 +54,7 @@ RACES = [
     ("fastf1_2026_austrian_grand_prix",  2026, "Austrian Grand Prix"),
     ("fastf1_2026_british_grand_prix",   2026, "British Grand Prix"),
     ("fastf1_2026_belgian_grand_prix",   2026, "Belgian Grand Prix"),
+    ("fastf1_2026_hungarian_grand_prix", 2026, "Hungarian Grand Prix"),
 ]
 
 

@@ -3824,3 +3824,30 @@
   transition: background 0.15s;
 }
 .comments-go-pro:hover { background: rgba(245,158,11,0.16); }
+
+/* ── Changelog ── */
+.changelog-list { display: flex; flex-direction: column; gap: 36px; max-width: 640px; }
+.changelog-release { }
+.changelog-release-header {
+  display: flex;
+  align-items: baseline;
+  gap: 12px;
+  margin-bottom: 14px;
+  padding-bottom: 10px;
+  border-bottom: 1px solid rgba(255,255,255,0.08);
+}
+.changelog-version { font-size: 16px; font-weight: 700; color: #fff; }
+.changelog-date { font-size: 13px; color: #555; }
+.changelog-entries { list-style: none; padding: 0; margin: 0; display: flex; flex-direction: column; gap: 9px; }
+.changelog-entry { display: flex; align-items: flex-start; gap: 10px; }
+.changelog-tag {
+  flex-shrink: 0;
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: 0.05em;
+  padding: 2px 7px;
+  border-radius: 4px;
+  color: #fff;
+  margin-top: 1px;
+}
+.changelog-text { font-size: 14px; color: #ccc; line-height: 1.5; }

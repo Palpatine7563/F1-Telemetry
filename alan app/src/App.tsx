@@ -40,6 +40,7 @@ import CircuitsPage from './components/CircuitsPage'
 import PrivacyPage from './components/PrivacyPage'
 import AboutPage from './components/AboutPage'
 import DisclaimerPage from './components/DisclaimerPage'
+import ChangelogPage from './components/ChangelogPage'
 import InsightsPage from './components/InsightsPage'
 import DailyChallenge from './components/DailyChallenge'
 import BattleTracker from './components/BattleTracker'
@@ -704,6 +705,8 @@ export default function App() {
             <AboutPage />
           ) : activeView === 'disclaimer' ? (
             <DisclaimerPage />
+          ) : activeView === 'changelog' ? (
+            <ChangelogPage />
           ) : activeView === 'pace' ? (
             <PaceAnalysisView />
           ) : activeView === 'pace2' ? (

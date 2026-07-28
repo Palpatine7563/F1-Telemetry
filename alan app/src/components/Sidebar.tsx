@@ -1,4 +1,4 @@
-type AppView = 'telemetry' | 'standings' | 'calendar' | 'results' | 'drivers' | 'teams' | 'circuits' | 'pace' | 'pace2' | 'insights' | 'challenge' | 'historicalraces' | 'privacy' | 'about' | 'disclaimer'
+type AppView = 'telemetry' | 'standings' | 'calendar' | 'results' | 'drivers' | 'teams' | 'circuits' | 'pace' | 'pace2' | 'insights' | 'challenge' | 'historicalraces' | 'privacy' | 'about' | 'disclaimer' | 'changelog'
 
 interface Props {
   active: AppView
@@ -18,6 +18,7 @@ const NAV: { id: AppView; icon: string; label: string; title: string }[] = [
   { id: 'insights',   icon: '📝', label: 'Insights',  title: 'Race Insights' },
   { id: 'challenge',       icon: '🎯', label: 'Challenge', title: 'Daily Telemetry Challenge' },
   { id: 'historicalraces', icon: '⚡', label: 'Classics',  title: 'Historic Race Replays' },
+  { id: 'changelog',       icon: '📣', label: "What's New", title: "What's New" },
 ]
 
 export default function Sidebar({ active, onNav }: Props) {

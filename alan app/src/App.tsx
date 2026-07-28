@@ -94,6 +94,19 @@ export default function App() {
 
   const [trackData, setTrackData] = useState<TrackData | null>(null)
 
+  // Inject AdSense after content renders so Auto Ads never sees a blank page
+  useEffect(() => {
+    const t = setTimeout(() => {
+      if (document.querySelector('script[src*="adsbygoogle"]')) return
+      const s = document.createElement('script')
+      s.async = true
+      s.src = 'https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-8705495890489536'
+      s.crossOrigin = 'anonymous'
+      document.head.appendChild(s)
+    }, 2000)
+    return () => clearTimeout(t)
+  }, [])
+
   // Supabase auth state
   useEffect(() => {
     supabase.auth.getSession().then(({ data }) => setAuthUser(data.session?.user ?? null))

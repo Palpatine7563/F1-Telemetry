@@ -23,6 +23,7 @@ export default function CommentsPanel({ circuitId, user, profile, onSignInClick,
   const [submitting, setSubmitting] = useState(false)
   const [showColors, setShowColors] = useState(false)
   const bottomRef                   = useRef<HTMLDivElement>(null)
+  const hexSaveTimer                = useRef<ReturnType<typeof setTimeout> | null>(null)
 
   const isPro = profile?.tier === 'pro'
   const myColor = profile?.comment_color ?? '#ffffff'
@@ -63,6 +64,20 @@ export default function CommentsPanel({ circuitId, user, profile, onSignInClick,
   useEffect(() => {
     bottomRef.current?.scrollIntoView({ behavior: 'smooth' })
   }, [comments.length])
+
+  function handleHexChange(color: string) {
+    if (!user) return
+    if (hexSaveTimer.current) clearTimeout(hexSaveTimer.current)
+    hexSaveTimer.current = setTimeout(async () => {
+      const { data } = await supabase
+        .from('profiles')
+        .update({ comment_color: color })
+        .eq('id', user.id)
+        .select()
+        .single()
+      if (data) onProfileUpdate(data as Profile)
+    }, 500)
+  }
 
   async function handleColorSelect(color: string) {
     if (!user) return
@@ -134,6 +149,13 @@ export default function CommentsPanel({ circuitId, user, profile, onSignInClick,
               onClick={() => handleColorSelect(c)}
             />
           ))}
+          <input
+            type="color"
+            className="color-picker-hex"
+            defaultValue={myColor}
+            onChange={e => handleHexChange(e.target.value)}
+            title="Custom color"
+          />
         </div>
       )}
 

@@ -774,6 +774,24 @@
   overflow: hidden;
 }
 
+.pro-download-csv-btn {
+  margin: 8px;
+  padding: 6px 10px;
+  border-radius: 6px;
+  border: 1px solid rgba(245,158,11,0.35);
+  background: rgba(245,158,11,0.08);
+  color: #f59e0b;
+  font-size: 11px;
+  font-weight: 600;
+  cursor: pointer;
+  text-align: center;
+  transition: background 0.15s, border-color 0.15s;
+}
+.pro-download-csv-btn:hover {
+  background: rgba(245,158,11,0.18);
+  border-color: rgba(245,158,11,0.6);
+}
+
 .radio-caption-box {
   background: #070d1a;
   border-top: 1px solid #1e2a3a;
@@ -3808,6 +3826,23 @@
 }
 .color-swatch:hover { transform: scale(1.15); }
 .color-swatch.active { border-color: #fff; }
+.color-picker-hex {
+  width: 22px;
+  height: 22px;
+  border-radius: 50%;
+  border: 2px solid transparent;
+  padding: 0;
+  cursor: pointer;
+  background: none;
+  appearance: none;
+  -webkit-appearance: none;
+  overflow: hidden;
+  transition: border-color 0.15s, transform 0.1s;
+}
+.color-picker-hex:hover { transform: scale(1.15); border-color: rgba(255,255,255,0.5); }
+.color-picker-hex::-webkit-color-swatch-wrapper { padding: 0; border-radius: 50%; }
+.color-picker-hex::-webkit-color-swatch { border: none; border-radius: 50%; }
+.color-picker-hex::-moz-color-swatch { border: none; border-radius: 50%; }
 
 /* ── Go Pro banner in comments ── */
 .comments-go-pro {

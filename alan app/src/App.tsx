@@ -94,8 +94,10 @@ export default function App() {
 
   const [trackData, setTrackData] = useState<TrackData | null>(null)
 
-  // Inject AdSense after content renders so Auto Ads never sees a blank page
+  // Inject AdSense after content renders so Auto Ads never sees a blank page.
+  // Pro users skip injection entirely; if they upgrade mid-session the script is removed.
   useEffect(() => {
+    if (profile?.tier === 'pro') return
     const t = setTimeout(() => {
       if (document.querySelector('script[src*="adsbygoogle"]')) return
       const s = document.createElement('script')
@@ -105,7 +107,12 @@ export default function App() {
       document.head.appendChild(s)
     }, 2000)
     return () => clearTimeout(t)
-  }, [])
+  }, [profile])
+
+  useEffect(() => {
+    if (profile?.tier !== 'pro') return
+    document.querySelector('script[src*="adsbygoogle"]')?.remove()
+  }, [profile])
 
   // Supabase auth state
   useEffect(() => {
@@ -638,6 +645,24 @@ export default function App() {
     },
   ]
 
+  function downloadTelemetryCSV() {
+    const headers = 'driver,time,speed,gear,throttle,brake,drs,x,y,distance,relDist'
+    for (const driver of Array.from(activeDrivers)) {
+      const points = mergedTelemetry[driver]
+      if (!points?.length) continue
+      const rows = points.map(p =>
+        `${driver},${p.time},${p.speed},${p.gear},${p.throttle},${p.brake ? 1 : 0},${p.drs},${p.x},${p.y},${p.distance},${p.relDist}`
+      )
+      const blob = new Blob([[headers, ...rows].join('\n')], { type: 'text/csv' })
+      const url = URL.createObjectURL(blob)
+      const a = document.createElement('a')
+      a.href = url
+      a.download = `${driver}_telemetry.csv`
+      a.click()
+      URL.revokeObjectURL(url)
+    }
+  }
+
   return (
     <div
       className="app"
@@ -834,6 +859,11 @@ export default function App() {
                             <div className="radio-caption-box-text">{activeRadioCaption.text}</div>
                           )}
                         </div>
+                      )}
+                      {profile?.tier === 'pro' && Array.from(activeDrivers).some(d => mergedTelemetry[d]?.length) && (
+                        <button className="pro-download-csv-btn" onClick={downloadTelemetryCSV}>
+                          ↓ Download CSV
+                        </button>
                       )}
                     </div>
                   </>

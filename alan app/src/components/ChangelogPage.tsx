@@ -5,7 +5,7 @@ const CHANGELOG: { version: string; date: string; entries: { tag: string; text: 
     entries: [
       { tag: 'new',  text: 'Real-time comments — live across all viewers via WebSocket' },
       { tag: 'new',  text: 'Sign in with Google or GitHub' },
-      { tag: 'new',  text: 'F1vis Pro — subscribe for custom comment color and more perks coming soon' },
+      { tag: 'new',  text: 'F1vis Pro — ad-free, custom comment color, CSV telemetry download, Pro badge' },
     ],
   },
   {

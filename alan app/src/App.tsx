@@ -645,6 +645,27 @@ export default function App() {
     },
   ]
 
+  async function downloadRadioClip(url: string, driver: string) {
+    const basename = url.split('/').pop() ?? 'clip.mp3'
+    const filename = `${circuit.id}_${circuit.year ?? 2026}_${driver}_${basename}`
+    try {
+      const res = await fetch(url)
+      const blob = await res.blob()
+      const blobUrl = URL.createObjectURL(blob)
+      const a = document.createElement('a')
+      a.href = blobUrl
+      a.download = filename
+      a.click()
+      URL.revokeObjectURL(blobUrl)
+    } catch {
+      const a = document.createElement('a')
+      a.href = url
+      a.download = filename
+      a.target = '_blank'
+      a.click()
+    }
+  }
+
   function downloadTelemetryCSV() {
     const headers = 'driver,time,speed,gear,throttle,brake,drs,x,y,distance,relDist'
     for (const driver of Array.from(activeDrivers)) {
@@ -853,7 +874,14 @@ export default function App() {
                           <div className="radio-caption-box-header">
                             <span className="radio-driver-dot" style={{ background: driverColor(activeRadioCaption.driver) }} />
                             <span className="radio-driver-name">{activeRadioCaption.driver}</span>
-                            <span className="radio-wave-icon" style={{ marginLeft: 'auto' }}>📻</span>
+                            {profile?.tier === 'pro' && (
+                              <button
+                                className="radio-download-btn"
+                                onClick={e => { e.stopPropagation(); downloadRadioClip(activeRadioCaption.url, activeRadioCaption.driver) }}
+                                title="Download clip"
+                              >↓</button>
+                            )}
+                            <span className="radio-wave-icon" style={{ marginLeft: profile?.tier === 'pro' ? '0' : 'auto' }}>📻</span>
                           </div>
                           {activeRadioCaption.text && (
                             <div className="radio-caption-box-text">{activeRadioCaption.text}</div>

@@ -134,8 +134,8 @@ function TelemetryChart({ telemetry, chartType, revealed }: {
   }
   const brakeArea = `M${toX(pts[0].distance).toFixed(1)},${plotBot} ${brakeLine} L${toX(pts[pts.length - 1].distance).toFixed(1)},${plotBot} Z`
 
-  const tGreen = revealed ? '#27ae60' : '#557'
-  const tRed   = revealed ? '#e74c3c' : '#556'
+  const tGreen = '#27ae60'
+  const tRed   = '#e74c3c'
 
   return (
     <svg viewBox={`0 0 ${SVG_W} ${SVG_H}`} className="ch-trace-svg" style={{ width: '100%', maxHeight: SVG_H }}>

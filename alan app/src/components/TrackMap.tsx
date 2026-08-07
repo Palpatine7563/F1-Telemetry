@@ -236,12 +236,14 @@ export default function TrackMap({
     }
   }, [progress, radioCallsWithProgress, radioEnabled, playing, tunedDriver, playSpeed, refLapDuration])
 
-  // Radio navigation — filtered to tuned driver (or all when not tuned)
+  // Radio navigation — filtered to tuned driver (or all when not tuned).
+  // Exclude post-race calls (progress > 1) — they can't be reached via the slider.
   const navCalls = useMemo(() => {
     if (!radioCallsWithProgress?.length || !radioEnabled) return []
+    const reachable = radioCallsWithProgress.filter(r => r.progress <= 1)
     return tunedDriver
-      ? radioCallsWithProgress.filter(r => r.driver === tunedDriver)
-      : radioCallsWithProgress
+      ? reachable.filter(r => r.driver === tunedDriver)
+      : reachable
   }, [radioCallsWithProgress, radioEnabled, tunedDriver])
 
   const currentNavIdx = useMemo(() => {
@@ -986,7 +988,11 @@ export default function TrackMap({
           <>
             <button
               className={`speed-btn ${radioEnabled ? 'active' : ''}`}
-              onClick={() => setRadioEnabled(v => !v)}
+              onClick={() => {
+                const next = !radioEnabled
+                setRadioEnabled(next)
+                if (next) onTuneDriver?.(null)   // reset driver lock when re-enabling
+              }}
               title={radioEnabled ? 'Mute team radio' : 'Enable team radio'}
             >
               📻

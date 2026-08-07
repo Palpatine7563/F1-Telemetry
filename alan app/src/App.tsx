@@ -582,7 +582,11 @@ export default function App() {
   )
 
   const handleProgressChange = useCallback((p: number | ((prev: number) => number)) => {
-    setProgress(p as number)
+    if (typeof p === 'function') {
+      setProgress(prev => Math.max(0, Math.min(1, p(prev))))
+    } else {
+      setProgress(Math.max(0, Math.min(1, p)))
+    }
   }, [])
 
   const effectiveHighlight = soloMode

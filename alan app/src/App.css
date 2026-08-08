@@ -3945,3 +3945,363 @@
   margin-top: 1px;
 }
 .changelog-text { font-size: 14px; color: #ccc; line-height: 1.5; }
+
+/* ── Games page ── */
+.games-page {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  overflow-y: auto;
+  padding: 24px 28px 0;
+  box-sizing: border-box;
+}
+
+.games-header {
+  margin-bottom: 20px;
+}
+
+.games-title {
+  font-size: 22px;
+  font-weight: 700;
+  color: #fff;
+  margin: 0 0 6px;
+}
+
+.games-sub {
+  font-size: 13px;
+  color: #556;
+  margin: 0;
+}
+
+.games-tab-bar {
+  display: flex;
+  gap: 8px;
+  border-bottom: 1px solid #1a2540;
+  padding-bottom: 12px;
+  margin-bottom: 20px;
+  flex-shrink: 0;
+}
+
+.games-tab {
+  padding: 7px 18px;
+  border-radius: 6px;
+  border: 1px solid #2a3a4a;
+  background: transparent;
+  color: #778;
+  font-size: 13px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.15s;
+}
+.games-tab:hover { color: #aaa; border-color: #445; }
+.games-tab.active {
+  background: #e10600;
+  border-color: #e10600;
+  color: #fff;
+}
+
+.games-content {
+  flex: 1;
+  min-height: 0;
+}
+
+.game-area {
+  max-width: 640px;
+  margin: 0 auto;
+  padding-bottom: 24px;
+}
+
+.game-score, .game-q-num {
+  font-size: 12px;
+  font-weight: 700;
+  color: #556;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  margin-bottom: 12px;
+}
+
+.game-card {
+  background: #0d1520;
+  border: 1px solid #1a2540;
+  border-radius: 10px;
+  padding: 22px 22px 18px;
+}
+
+.game-finished {
+  text-align: center;
+  padding: 40px 24px;
+}
+
+.game-finish-headline {
+  font-size: 16px;
+  font-weight: 700;
+  color: #aaa;
+  margin: 0 0 8px;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+}
+
+.game-finish-score {
+  font-size: 52px;
+  font-weight: 900;
+  color: #e10600;
+  margin: 0 0 12px;
+  line-height: 1;
+}
+
+.game-finish-msg {
+  font-size: 14px;
+  color: #778;
+  margin: 0 0 24px;
+}
+
+.circuit-clue-box {
+  background: #0a1018;
+  border: 1px solid #1a2540;
+  border-radius: 7px;
+  padding: 14px 16px;
+  margin-bottom: 18px;
+}
+
+.circuit-clue-char {
+  font-size: 14px;
+  color: #ccc;
+  line-height: 1.55;
+  font-style: italic;
+  margin: 0 0 12px;
+}
+
+.circuit-clue-stats {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.circuit-clue-stats span {
+  font-size: 11px;
+  font-weight: 700;
+  color: #556;
+  background: #111c2a;
+  border: 1px solid #1a2540;
+  padding: 3px 9px;
+  border-radius: 4px;
+  letter-spacing: 0.3px;
+}
+
+.game-prompt {
+  font-size: 15px;
+  font-weight: 600;
+  color: #ddd;
+  margin: 0 0 14px;
+}
+
+.game-options {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 8px;
+  margin-bottom: 4px;
+}
+
+.game-opt {
+  padding: 10px 12px;
+  border-radius: 6px;
+  border: 1px solid #2a3a4a;
+  background: #111c2a;
+  color: #bbb;
+  font-size: 13px;
+  font-weight: 500;
+  cursor: pointer;
+  text-align: left;
+  transition: border-color 0.12s, background 0.12s, color 0.12s;
+  line-height: 1.35;
+}
+.game-opt:hover:not(.correct):not(.wrong):not(.dim) {
+  border-color: #445;
+  color: #fff;
+  background: #182030;
+}
+.game-opt.correct {
+  border-color: #22c55e;
+  background: rgba(34,197,94,0.1);
+  color: #22c55e;
+  cursor: default;
+}
+.game-opt.wrong {
+  border-color: #e10600;
+  background: rgba(225,6,0,0.1);
+  color: #e10600;
+  cursor: default;
+}
+.game-opt.dim {
+  opacity: 0.35;
+  cursor: default;
+}
+
+.game-result {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 10px;
+  margin-top: 16px;
+  padding-top: 14px;
+  border-top: 1px solid #1a2540;
+}
+
+.game-correct-msg {
+  font-size: 14px;
+  font-weight: 700;
+  color: #22c55e;
+}
+
+.game-wrong-msg {
+  font-size: 14px;
+  font-weight: 700;
+  color: #e57373;
+}
+
+.game-next-btn {
+  margin-left: auto;
+  padding: 7px 18px;
+  border-radius: 6px;
+  border: 1px solid #e10600;
+  background: transparent;
+  color: #e10600;
+  font-size: 13px;
+  font-weight: 700;
+  cursor: pointer;
+  transition: background 0.15s, color 0.15s;
+}
+.game-next-btn:hover { background: #e10600; color: #fff; }
+
+.game-fact {
+  font-size: 12px;
+  color: #778;
+  font-style: italic;
+  line-height: 1.5;
+  margin: 4px 0 0;
+  width: 100%;
+}
+
+/* Who Am I? */
+.whoami-pts-hint {
+  font-size: 12px;
+  color: #556;
+  margin-bottom: 14px;
+}
+
+.whoami-clues {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  margin-bottom: 18px;
+}
+
+.whoami-clue {
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+  font-size: 14px;
+  color: #bbb;
+  line-height: 1.5;
+}
+
+.whoami-clue-num {
+  flex-shrink: 0;
+  width: 22px;
+  height: 22px;
+  border-radius: 50%;
+  background: #1a2540;
+  color: #556;
+  font-size: 11px;
+  font-weight: 700;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-top: 1px;
+}
+
+.whoami-input {
+  display: flex;
+  gap: 8px;
+  margin-bottom: 10px;
+}
+
+.whoami-input input {
+  flex: 1;
+  padding: 8px 12px;
+  border-radius: 6px;
+  border: 1px solid #2a3a4a;
+  background: #0a1018;
+  color: #ddd;
+  font-size: 13px;
+  outline: none;
+  transition: border-color 0.15s;
+}
+.whoami-input input:focus { border-color: #e10600; }
+.whoami-input input::placeholder { color: #445; }
+
+.whoami-controls {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
+.game-clue-btn {
+  padding: 7px 16px;
+  border-radius: 6px;
+  border: 1px solid #2a3a4a;
+  background: #111c2a;
+  color: #aaa;
+  font-size: 13px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.15s;
+}
+.game-clue-btn:hover:not(:disabled) { border-color: #445; color: #ddd; }
+.game-clue-btn:disabled { opacity: 0.4; cursor: default; }
+
+.game-giveup-btn {
+  padding: 7px 16px;
+  border-radius: 6px;
+  border: 1px solid #2a3a4a;
+  background: transparent;
+  color: #445;
+  font-size: 13px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: color 0.15s, border-color 0.15s;
+}
+.game-giveup-btn:hover { color: #e57373; border-color: rgba(229,115,115,0.3); }
+
+/* Save bar */
+.games-save-bar {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 12px 16px;
+  margin-top: 8px;
+  background: #0a1018;
+  border-top: 1px solid #1a2540;
+  font-size: 13px;
+  color: #778;
+  flex-shrink: 0;
+}
+
+.games-save-signin {
+  margin-left: auto;
+  padding: 5px 14px;
+  border-radius: 5px;
+  border: 1px solid #e10600;
+  background: transparent;
+  color: #e10600;
+  font-size: 12px;
+  font-weight: 700;
+  cursor: pointer;
+  transition: background 0.15s, color 0.15s;
+}
+.games-save-signin:hover { background: #e10600; color: #fff; }
+
+@media (max-width: 500px) {
+  .game-options { grid-template-columns: 1fr; }
+  .games-page { padding: 16px 16px 0; }
+}

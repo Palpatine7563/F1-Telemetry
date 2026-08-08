@@ -42,7 +42,7 @@ import AboutPage from './components/AboutPage'
 import DisclaimerPage from './components/DisclaimerPage'
 import ChangelogPage from './components/ChangelogPage'
 import InsightsPage from './components/InsightsPage'
-import DailyChallenge from './components/DailyChallenge'
+import GamesPage from './components/GamesPage'
 import BattleTracker from './components/BattleTracker'
 import HistoricalRacesPage from './components/HistoricalRacesPage'
 import PositionChart from './components/PositionChart'
@@ -61,7 +61,7 @@ export default function App() {
   const [colorMode, setColorMode] = useState<ColorMode>('speed')
   const [progress, setProgress] = useState(0)
   const [playing, setPlaying] = useState(false)
-  const VALID_VIEWS: AppView[] = ['telemetry', 'standings', 'calendar', 'results', 'drivers', 'teams', 'circuits', 'pace', 'pace2', 'insights', 'challenge', 'historicalraces', 'privacy', 'about', 'disclaimer', 'changelog']
+  const VALID_VIEWS: AppView[] = ['telemetry', 'standings', 'calendar', 'results', 'drivers', 'teams', 'circuits', 'pace', 'pace2', 'insights', 'games', 'historicalraces', 'privacy', 'about', 'disclaimer', 'changelog']
   const hashToView = (hash: string): AppView => {
     const v = hash.replace(/^#\/?/, '') as AppView
     return VALID_VIEWS.includes(v) ? v : 'telemetry'
@@ -752,8 +752,8 @@ export default function App() {
             <CircuitsPage />
           ) : activeView === 'insights' ? (
             <InsightsPage />
-          ) : activeView === 'challenge' ? (
-            <DailyChallenge />
+          ) : activeView === 'games' ? (
+            <GamesPage authUser={authUser} onSignIn={() => setAuthModalOpen(true)} />
           ) : activeView === 'historicalraces' ? (
             <HistoricalRacesPage
               onWatchReplay={(c) => {

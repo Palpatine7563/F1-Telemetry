@@ -1613,6 +1613,7 @@
 .privacy-meta { font-size: 11px; color: #445; margin: 0 0 24px; }
 .privacy-intro { font-size: 13px; color: #889; line-height: 1.7; margin: 0 0 20px; }
 .privacy-h2 { font-size: 13px; font-weight: 800; color: #aab; text-transform: uppercase; letter-spacing: 1px; margin: 24px 0 8px; padding-bottom: 6px; border-bottom: 1px solid #1a2330; }
+.privacy-h3 { font-size: 12px; font-weight: 700; color: #889; margin: 14px 0 6px; }
 .privacy-page p { font-size: 13px; color: #778; line-height: 1.7; margin: 0 0 10px; }
 .privacy-list { margin: 0 0 10px; padding-left: 20px; }
 .privacy-list li { font-size: 13px; color: #778; line-height: 1.7; margin-bottom: 4px; }

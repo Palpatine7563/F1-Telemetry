@@ -1,5 +1,27 @@
 const INSIGHTS = [
   {
+    round: 'R11',
+    race: 'Hungarian GP — Hungaroring',
+    date: 'July 26, 2026',
+    tag: 'Mechanical Grip',
+    body: [
+      `The Hungaroring is the closest thing to a street circuit that appears on a permanent venue calendar, and the 2026 Hungarian Grand Prix telemetry underscores exactly why. With an average speed below 195 km/h and full-throttle time of approximately 52% — the second lowest of any permanent venue on the 2026 calendar — the data tells a story of mechanical grip, low-speed rotation, and traction out of tight hairpins. There is no place to hide aero balance deficiencies here; the medium-speed chicane sequence in Sector 2 demands a car that transitions fluently between compressions and direction changes with no aerodynamic assistance at those speeds.`,
+      `Lando Norris and McLaren delivered a commanding performance that the telemetry data supports convincingly. Through the Turn 2 right-hander — the single largest determinant of lap time at the Hungaroring — the McLaren was sustaining minimum corner speeds over 8 km/h higher than the next-fastest qualifier, a margin that traces directly to the car's superior rear mechanical grip under trail-braking. This advantage compounded through the long transition from Turn 2 through Turn 4, where the stability gained at Turn 2 entry allowed Norris to use full throttle almost 200 metres earlier than several rivals — a staggering gain that explains much of the 0.38-second pole margin.`,
+      `Tyre behaviour in Budapest's high-ambient summer conditions added a layer of strategy complexity not always visible from a broadcast perspective. The throttle traces from laps 25–35 reveal a sharply diverging picture between the top two strategies: drivers on the medium compound who had qualified on the front two rows were being forced to manage rear temperatures through the constant low-speed direction changes, showing increasing oversteer corrections into the tight hairpin. Meanwhile, those who had sacrificed grid position for a fresh hard-tyre gamble in the second stint were extracting pace more freely. The telemetry data from that phase of the race provides one of the clearest 2026 illustrations of how compound selection at the pit stop can override raw car performance in the final act of a Hungarian Grand Prix.`,
+    ],
+  },
+  {
+    round: 'R10',
+    race: 'Belgian GP — Circuit de Spa-Francorchamps',
+    date: 'July 19, 2026',
+    tag: 'ERS Deployment',
+    body: [
+      `Spa-Francorchamps demands more from an F1 car's energy recovery and deployment systems than almost anywhere else on the calendar, and the 2026 Belgian Grand Prix telemetry captures this better than any previous season due to the step change in ERS capability brought by the new regulations. The Kemmel Straight — a 1.8-kilometre flat-out blast from the top of Eau Rouge all the way to Les Combes — provided the clearest window yet into the true power unit hierarchy of 2026. Top-speed differentials of over 14 km/h between the fastest and slowest traps translated into braking point offsets of nearly 90 metres at the end of the straight, a gap that almost entirely traces to ERS deployment rate rather than traditional combustion engine differences.`,
+      `The commitment level through the Eau Rouge and Raidillon complex in qualifying was extraordinary even by Spa standards. With the 2026 active aerodynamics capable of generating significantly more downforce at speed than fixed-wing equivalents, the fastest drivers were approaching the valley of Eau Rouge with a calculated confidence that would have been unthinkable in a conventional car. The speed traces show the top three qualifiers all at or within 2 km/h of full throttle through the entire sequence — a feat of aerodynamic and driver trust that directly reflects how the new regulations have altered the risk calculus at one of the sport's most celebrated corners.`,
+      `Race winner Kimi Antonelli benefited from a strategic gamble that the telemetry data both explains and vindicates. Running longer on the first stint than the leading group, the Mercedes data shows a remarkably flat degradation curve on the medium tyre compared to rivals — a direct product of Spa's long straights reducing the sustained cornering loads that typically cause rear overheating. When the undercut came for those ahead, Antonelli's pace had not yet deteriorated to the point where the position cost was prohibitive, and his out-lap on fresh tyres — visible in the brake and throttle overlays as a notably more aggressive application at every corner — was ultimately decisive in the Belgian Grand Prix result.`,
+    ],
+  },
+  {
     round: 'R9',
     race: 'British GP — Silverstone Circuit',
     date: 'July 5, 2026',

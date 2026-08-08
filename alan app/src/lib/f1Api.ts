@@ -83,8 +83,10 @@ export async function fetchSchedule(): Promise<Race[]> {
 }
 
 export async function fetchAllResults(): Promise<Race[]> {
-  const d = await get('/2026/results.json?limit=500')
-  return d.MRData?.RaceTable?.Races ?? []
+  const d = await get('/2026.json?limit=30')
+  const all: Race[] = d.MRData?.RaceTable?.Races ?? []
+  const today = new Date().toISOString().slice(0, 10)
+  return all.filter(r => r.date <= today)
 }
 
 export async function fetchRaceResult(round: number): Promise<Race | null> {

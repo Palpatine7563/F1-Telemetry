@@ -20,7 +20,7 @@ const ROUND_ABBR: Record<string, string> = {
   'Italian': 'ITA', 'Singapore': 'SGP', 'United States': 'USA',
   'Mexico City': 'MEX', 'São Paulo': 'BRA', 'Las Vegas': 'LVG',
   'Qatar': 'QAT', 'Abu Dhabi': 'UAE', 'Barcelona-Catalunya': 'BCN',
-  'Madrid': 'MAD',
+  'Madrid': 'MAD', 'Barcelona': 'BCN', 'Bahrain in Malaysia': 'MYS',
 }
 
 function raceAbbr(raceName: string): string {

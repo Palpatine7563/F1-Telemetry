@@ -1,5 +1,15 @@
 const CHANGELOG: { version: string; date: string; entries: { tag: string; text: string }[] }[] = [
   {
+    version: '1.5',
+    date: 'Aug 2026',
+    entries: [
+      { tag: 'new',  text: 'Games section — Circuit ID, Who Am I?, F1 Trivia, and Daily Challenge in one place' },
+      { tag: 'impr', text: 'Race Insights cards are now individually collapsible' },
+      { tag: 'fix',  text: 'Team radio skip button no longer gets stuck at end of race' },
+      { tag: 'fix',  text: 'Standings and results now correctly show all completed rounds' },
+    ],
+  },
+  {
     version: '1.4',
     date: 'Jul 2026',
     entries: [

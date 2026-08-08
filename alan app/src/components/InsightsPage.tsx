@@ -122,7 +122,20 @@ const INSIGHTS = [
   },
 ]
 
+import { useState } from 'react'
+
 export default function InsightsPage() {
+  const [collapsed, setCollapsed] = useState<Set<string>>(new Set())
+
+  function toggle(round: string) {
+    setCollapsed(prev => {
+      const next = new Set(prev)
+      if (next.has(round)) next.delete(round)
+      else next.add(round)
+      return next
+    })
+  }
+
   return (
     <div className="insights-page">
       <div className="insights-header">
@@ -130,25 +143,35 @@ export default function InsightsPage() {
         <p className="insights-sub">Written analysis of telemetry, pace, and strategy from each 2026 race weekend</p>
       </div>
       <div className="insights-list">
-        {INSIGHTS.map((item) => (
-          <article key={item.round} className="insight-card">
-            <div className="insight-card-header">
-              <span className="insight-round">{item.round}</span>
-              <div className="insight-meta">
-                <h2 className="insight-race">{item.race}</h2>
-                <div className="insight-sub-meta">
-                  <span className="insight-date">{item.date}</span>
-                  <span className="insight-tag">{item.tag}</span>
+        {INSIGHTS.map((item) => {
+          const isCollapsed = collapsed.has(item.round)
+          return (
+            <article key={item.round} className="insight-card">
+              <div className="insight-card-header">
+                <span className="insight-round">{item.round}</span>
+                <div className="insight-meta">
+                  <h2 className="insight-race">{item.race}</h2>
+                  <div className="insight-sub-meta">
+                    <span className="insight-date">{item.date}</span>
+                    <span className="insight-tag">{item.tag}</span>
+                  </div>
                 </div>
+                <button
+                  className="insight-toggle"
+                  onClick={() => toggle(item.round)}
+                  title={isCollapsed ? 'Expand' : 'Collapse'}
+                >
+                  {isCollapsed ? '▸' : '▾'}
+                </button>
               </div>
-            </div>
-            <div className="insight-body">
-              {item.body.map((para, i) => (
-                <p key={i} className="insight-para">{para}</p>
-              ))}
-            </div>
-          </article>
-        ))}
+              <div className={`insight-body ${isCollapsed ? 'insight-body--collapsed' : ''}`}>
+                {item.body.map((para, i) => (
+                  <p key={i} className="insight-para">{para}</p>
+                ))}
+              </div>
+            </article>
+          )
+        })}
       </div>
     </div>
   )

@@ -1586,7 +1586,7 @@
   transition: background 0.12s;
 }
 .insight-card:hover { background: #0a0f16; }
-.insight-card-header { display: flex; align-items: flex-start; gap: 16px; margin-bottom: 14px; }
+.insight-card-header { display: flex; align-items: flex-start; gap: 16px; margin-bottom: 14px; cursor: default; }
 .insight-round {
   font-size: 10px; font-weight: 800; color: #e10600;
   background: #1a0505; border: 1px solid #e10600;
@@ -1602,7 +1602,36 @@
   letter-spacing: 1px; color: #556; background: #111820;
   border: 1px solid #1e2a38; padding: 2px 7px; border-radius: 3px;
 }
-.insight-body { max-width: 800px; }
+.insight-toggle {
+  margin-left: auto;
+  flex-shrink: 0;
+  background: none;
+  border: 1px solid #1e2a38;
+  border-radius: 4px;
+  color: #445;
+  font-size: 13px;
+  width: 26px;
+  height: 26px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: color 0.12s, border-color 0.12s;
+}
+.insight-toggle:hover { color: #aab; border-color: #2a3a4a; }
+
+.insight-body {
+  max-width: 800px;
+  overflow: hidden;
+  max-height: 2000px;
+  transition: max-height 0.3s ease, opacity 0.25s ease;
+  opacity: 1;
+}
+.insight-body--collapsed {
+  max-height: 0;
+  opacity: 0;
+  transition: max-height 0.25s ease, opacity 0.15s ease;
+}
 .insight-para { font-size: 13px; color: #778; line-height: 1.75; margin: 0 0 12px; }
 .insight-para:last-child { margin-bottom: 0; }
 

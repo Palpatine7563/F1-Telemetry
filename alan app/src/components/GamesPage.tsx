@@ -99,7 +99,7 @@ const DRIVER_PUZZLES: DriverPuzzle[] = [
   {
     answer: 'Fernando Alonso',
     clues: [
-      'I am one of only two drivers alive who won back-to-back Formula 1 World Championships — the other is my old rival Michael Schumacher.',
+      'I ended Michael Schumacher\'s run of five consecutive World Championships in 2005, becoming the youngest Formula 1 champion in history at the time — aged just 24.',
       'I am Spanish, from Oviedo in Asturias, and I am the oldest driver still competing on the 2026 Formula 1 grid.',
       'I won the 24 Hours of Le Mans twice with Porsche and have attempted the Indianapolis 500 multiple times in pursuit of motorsport\'s Triple Crown.',
       'I currently race for a British team that competes in dark British Racing Green and is best known for making some of the world\'s most celebrated grand touring cars.',
@@ -178,6 +178,17 @@ const DRIVER_PUZZLES: DriverPuzzle[] = [
     ],
   },
 ]
+
+function normalizeGuess(s: string): string {
+  return s.normalize('NFD').replace(/[̀-ͯ]/g, '').toLowerCase().trim()
+}
+
+function checkAnswer(input: string, answer: string): boolean {
+  const norm = normalizeGuess(input)
+  const full = normalizeGuess(answer)
+  const lastName = normalizeGuess(answer.split(' ').slice(1).join(' '))
+  return norm === full || (lastName.length > 2 && norm === lastName)
+}
 
 function makeDriverPuzzle() {
   const idx = Math.floor(Math.random() * DRIVER_PUZZLES.length)
@@ -379,7 +390,7 @@ function WhoAmIGame() {
 
   function submit() {
     if (done || !input.trim()) return
-    const isCorrect = input.trim().toLowerCase() === puzzle.answer.toLowerCase()
+    const isCorrect = checkAnswer(input, puzzle.answer)
     setResult(isCorrect ? 'correct' : 'wrong')
     setTotal(t => t + 1)
     if (isCorrect) {

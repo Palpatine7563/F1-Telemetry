@@ -313,13 +313,16 @@ function CircuitGame() {
       <div className="game-score">{score} / {total} correct</div>
       <div className="game-card">
         <div className="circuit-clue-box">
-          <p className="circuit-clue-char">"{data.character}"</p>
           <div className="circuit-clue-stats">
             <span>🔄 {data.direction}</span>
             <span>↩ {data.corners} corners</span>
             <span>📏 {data.length}</span>
+            <span>💨 {data.topSpeed} top speed</span>
             <span>🚀 {data.drsZones} DRS zones</span>
+            <span>🏎 {data.laps} laps</span>
+            <span>📉 {data.downforceLevel} downforce</span>
             <span>🏟 {data.circuitType}</span>
+            <span>📅 First GP: {data.firstGP}</span>
           </div>
         </div>
         <p className="game-prompt">Which circuit is this?</p>

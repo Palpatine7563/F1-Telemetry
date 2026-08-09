@@ -4063,14 +4063,6 @@
   margin-bottom: 18px;
 }
 
-.circuit-clue-char {
-  font-size: 14px;
-  color: #ccc;
-  line-height: 1.55;
-  font-style: italic;
-  margin: 0 0 12px;
-}
-
 .circuit-clue-stats {
   display: flex;
   flex-wrap: wrap;

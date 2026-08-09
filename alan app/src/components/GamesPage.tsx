@@ -45,73 +45,136 @@ const DRIVER_PUZZLES: DriverPuzzle[] = [
   {
     answer: 'Lando Norris',
     clues: [
-      'I drive for a team whose livery is papaya orange and carbon black.',
-      'I was born in Bristol, England in 1999.',
-      'I took my first Formula 1 win at the 2024 Miami Grand Prix.',
-      'Fans call me "Last Lap Lando" — a nickname I have been trying to leave behind.',
-    ],
-  },
-  {
-    answer: 'Kimi Antonelli',
-    clues: [
-      'I was signed to a prestigious driver academy before my fifteenth birthday.',
-      'I am Italian and made my Formula 1 debut in 2025 with a team based in Brackley.',
-      'I replaced a seven-time world champion in my debut season.',
-      'My first name is Andrea and my surname matches a famous Italian operatic tenor.',
-    ],
-  },
-  {
-    answer: 'Lewis Hamilton',
-    clues: [
-      'I hold the record for the most pole positions in Formula 1 history.',
-      'I was the first Black driver to compete in Formula 1.',
-      'I signed a headline-making move to a Maranello-based team for the 2025 season.',
-      'I grew up in Stevenage, England and was karting before the age of eight.',
-    ],
-  },
-  {
-    answer: 'George Russell',
-    clues: [
-      'I became Formula 2 champion in my debut season in 2018.',
-      'I am British and drive for a Silver Arrows team.',
-      'I scored a famous maiden Grand Prix victory in Brazil in 2022.',
-      'I am known for exceptional single-lap performance, particularly in wet conditions.',
-    ],
-  },
-  {
-    answer: 'Charles Leclerc',
-    clues: [
-      'I drive for a team whose home is in northern Italy and whose emblem is a prancing horse.',
-      'I was born in Monte Carlo and have won the Monaco Grand Prix.',
-      'I became the youngest driver to take pole position at Bahrain, and won there too.',
-      'I was teammates with Kimi Räikkönen before Sebastian Vettel joined my team.',
-    ],
-  },
-  {
-    answer: 'Max Verstappen',
-    clues: [
-      'I am the youngest driver ever to start a Formula 1 race, at just 17 years old.',
-      'I am Dutch and race for a Milton Keynes-based team whose title sponsor is an energy drink brand.',
-      'I took my first Grand Prix win on debut for my new team at the 2016 Spanish Grand Prix.',
-      'I won four consecutive Formula 1 World Championships from 2021 to 2024.',
+      'My race number is 4 and I am well known for streaming video games online between race weekends — something very few F1 drivers do publicly.',
+      'I am British, born in the Bristol area in 1999, and I have raced for the same team since my very first Formula 1 season.',
+      'In 2021 at the Russian Grand Prix, I was leading comfortably with a few laps to go when a late safety car cost me what should have been my first win.',
+      'I finally broke my victory drought at the 2024 Miami Grand Prix, ending years of agonisingly close calls.',
     ],
   },
   {
     answer: 'Oscar Piastri',
     clues: [
-      'I am Australian and won the Formula 2 championship in 2021.',
-      'I drive for a team in papaya and black alongside a British driver.',
-      'I famously rejected a public announcement that I would drive for a French team in 2023.',
-      'I am known for being ice-cool under pressure and producing rapid out-laps on fresh tyres.',
+      'I am the only driver in Formula 1 history to win the Formula 3 and Formula 2 championships in back-to-back seasons.',
+      'I am Australian, from Melbourne, and I spent an entire year as a reserve driver in 2022 — champion, but not allowed to race.',
+      'In the summer of 2022, a team publicly announced I would drive for them the next season. I publicly denied it the very same day.',
+      'My race number is 81 and teammates describe me as unusually calm under pressure — some say I have a poker face behind the visor.',
+    ],
+  },
+  {
+    answer: 'Max Verstappen',
+    clues: [
+      'My father competed in Formula 1 in the 1990s and early 2000s and I carry exactly the same surname.',
+      'I am Dutch and I became the youngest driver in Formula 1 history to start a race, aged 17 years and 166 days.',
+      'I won my first Grand Prix at the 2016 Spanish GP on debut for my new team — the same race where two silver cars collided and retired on the opening lap.',
+      'I won four consecutive World Championships from 2021 to 2024 and now carry the coveted number 1 on my car.',
+    ],
+  },
+  {
+    answer: 'Lewis Hamilton',
+    clues: [
+      'I hold the all-time records for both race wins and pole positions in Formula 1 — records that still stood entering the 2026 season.',
+      'I was awarded a knighthood, making me Sir Lewis — an honour no other currently active Formula 1 driver holds.',
+      'I spent over a decade at a Brackley-based team and won six of my seven championships with them before a move to Ferrari for 2025.',
+      'I grew up in Stevenage, England, and was the first Black driver in the history of Formula 1.',
+    ],
+  },
+  {
+    answer: 'George Russell',
+    clues: [
+      'I earned the nickname "Mr. Saturday" early in my career for consistently out-qualifying my teammate despite driving the slowest car on the grid.',
+      'I am British, won the Formula 2 championship in my debut season in 2018, then spent three years at a Grove-based team before being promoted to Mercedes.',
+      'In 2020, I substituted for a seven-time world champion at the Bahrain Sakhir Grand Prix in a car I had never driven — and very nearly won.',
+      'My race number is 63 and I took my maiden Grand Prix victory in Brazil in 2022.',
+    ],
+  },
+  {
+    answer: 'Charles Leclerc',
+    clues: [
+      'I was born in Monte Carlo — the city that hosts the most glamorous race on the calendar — and I have won the Monaco Grand Prix.',
+      'I am the godson of Jules Bianchi, the talented French driver who inspired me and who tragically died following the 2014 Japanese Grand Prix.',
+      'I drive for the team with the prancing horse emblem and have been their lead driver since 2019, when I won on my debut for them in Bahrain.',
+      'My race number is 16 and I was teammates with Kimi Räikkönen in my first Ferrari season before Sebastian Vettel joined the following year.',
     ],
   },
   {
     answer: 'Fernando Alonso',
     clues: [
-      'I am a two-time Formula 1 World Champion, winning back-to-back in 2005 and 2006.',
-      'I am Spanish, from Oviedo in Asturias, and am known for my relentless racecraft.',
-      'I have competed in the Indianapolis 500 and the 24 Hours of Le Mans in pursuit of the Triple Crown.',
-      'I currently drive for a team named after a Canadian province and continue racing into my forties.',
+      'I am one of only two drivers alive who won back-to-back Formula 1 World Championships — the other is my old rival Michael Schumacher.',
+      'I am Spanish, from Oviedo in Asturias, and I am the oldest driver still competing on the 2026 Formula 1 grid.',
+      'I won the 24 Hours of Le Mans twice with Porsche and have attempted the Indianapolis 500 multiple times in pursuit of motorsport\'s Triple Crown.',
+      'I currently race for a British team that competes in dark British Racing Green and is best known for making some of the world\'s most celebrated grand touring cars.',
+    ],
+  },
+  {
+    answer: 'Kimi Antonelli',
+    clues: [
+      'I was born in Bologna, Italy in 2006 — making me one of the youngest drivers in Formula 1 history when I made my debut.',
+      'I was signed to a manufacturer\'s driver academy at just 13 years old, years before I had any major junior title to my name.',
+      'I made my Formula 1 debut in 2025 at the team based in Brackley, replacing a driver who had won six consecutive World Championships with them.',
+      'My full name is Andrea Kimi Antonelli — the middle name a tribute paid to a Finnish world champion who inspired my family.',
+    ],
+  },
+  {
+    answer: 'Carlos Sainz',
+    clues: [
+      'My father is a two-time World Rally Championship winner who shares my first name and surname exactly — we are a family of motorsport champions.',
+      'I am Spanish, and I won my first Formula 1 Grand Prix at Silverstone in 2022 — just days after being discharged from hospital following emergency appendix surgery.',
+      'I have raced for six different Formula 1 teams, including Red Bull\'s junior team, Renault, McLaren, and Ferrari, before my current seat.',
+      'My race number is 55 and I currently drive for a Grove-based team whose car is predominantly white.',
+    ],
+  },
+  {
+    answer: 'Sergio Pérez',
+    clues: [
+      'I am Mexican, from Guadalajara, and I am by far the most successful Mexican driver in the history of Formula 1.',
+      'My nickname is "Checo" and I drove for the same team through three different name changes — Force India, Racing Point, and Aston Martin — before joining a championship-winning outfit.',
+      'I won my first Formula 1 Grand Prix at the 2020 Sakhir Grand Prix in Bahrain in dramatic fashion, running low on fuel on the final lap.',
+      'I drove alongside Max Verstappen at Red Bull Racing and was instrumental in helping the team win the Constructors\' Championship.',
+    ],
+  },
+  {
+    answer: 'Pierre Gasly',
+    clues: [
+      'I produced one of the biggest shock results in recent Formula 1 history when I won the 2020 Italian Grand Prix at Monza, starting from tenth on the grid for a small team.',
+      'I am French, from Rouen, and I was promoted to a top team mid-season but sent back down after struggling — a demotion that ultimately made me a stronger driver.',
+      'My race number is 10 and I now drive for the team that positions itself as the French national team of Formula 1, with blue, white, and red on the livery.',
+      'I am known for a passionate and emotional driving style — the opposite of calm — and my celebrations after surprising results have become iconic.',
+    ],
+  },
+  {
+    answer: 'Lance Stroll',
+    clues: [
+      'My father is the owner and chairman of the team I drive for — a fact that has defined my place in the Formula 1 paddock since my debut.',
+      'I am Canadian, from Montreal — the city that hosts the Grand Prix at the circuit named after one of racing\'s all-time greatest heroes.',
+      'I was the youngest Canadian ever to compete in Formula 1 when I debuted at Williams in 2017 aged just 18.',
+      'I took a stunning pole position in wet qualifying at the 2017 Azerbaijan Grand Prix — one of the most surprising qualifying results of that decade.',
+    ],
+  },
+  {
+    answer: 'Nico Hülkenberg',
+    clues: [
+      'I am German and I hold the record for the most Formula 1 race starts without ever finishing on the podium — a record that followed me throughout my career.',
+      'Despite never reaching the podium in Formula 1, I won the 24 Hours of Le Mans outright in 2015 driving for the Porsche factory team.',
+      'My nickname is "The Hulk" — a reference to my surname and a physicality that stands out even by F1 standards.',
+      'I have raced for Williams, Sauber, Force India, Renault, Racing Point, and Haas — one of the most widely-travelled drivers of the modern era.',
+    ],
+  },
+  {
+    answer: 'Yuki Tsunoda',
+    clues: [
+      'I am Japanese, from Sagamihara, and I was the first Japanese driver to score a Formula 1 championship point in over a decade when I debuted in 2021.',
+      'My team radio messages have become famous among fans for their colourful language and raw emotion — clips of my reactions go viral regularly on social media.',
+      'At 159 centimetres, I am one of the shortest drivers on the Formula 1 grid — a fact that gives me a measurable weight advantage in the car.',
+      'My race number is 22 and I drive for the Red Bull junior programme\'s sister team, which has gone through three name changes since I joined.',
+    ],
+  },
+  {
+    answer: 'Valtteri Bottas',
+    clues: [
+      'I am Finnish, from Nastola, and I was once described by my team principal as "the perfect wingman" — a compliment I found double-edged.',
+      'I spent five seasons at Mercedes alongside Lewis Hamilton, winning ten Grands Prix and two Constructors\' Championships as a team player.',
+      'I am known in the paddock for an extremely calm, self-deprecating personality and for a famous social media post after a difficult qualifying session that became a fan favourite.',
+      'My race number is 77 and I now drive for the Sauber team, which is transitioning into a new identity for the 2026 regulations.',
     ],
   },
 ]
@@ -293,6 +356,7 @@ function CircuitGame() {
 
 const MAX_CLUES = 4
 const PTS_BY_CLUES = [4, 3, 2, 1]
+const WHOAMI_BEST_KEY = 'f1vis_whoami_best'
 
 function WhoAmIGame() {
   const [state, setState] = useState<{ puzzle: DriverPuzzle; cluesShown: number }>(makeDriverPuzzle)
@@ -300,6 +364,11 @@ function WhoAmIGame() {
   const [result, setResult] = useState<'correct' | 'wrong' | null>(null)
   const [score, setScore] = useState(0)
   const [total, setTotal] = useState(0)
+  const [streak, setStreak] = useState(0)
+  const [bestStreak, setBestStreak] = useState(() => {
+    const saved = parseInt(localStorage.getItem(WHOAMI_BEST_KEY) ?? '0', 10)
+    return isNaN(saved) ? 0 : saved
+  })
 
   const { puzzle, cluesShown } = state
   const pts = PTS_BY_CLUES[cluesShown - 1] ?? 1
@@ -310,7 +379,20 @@ function WhoAmIGame() {
     const isCorrect = input.trim().toLowerCase() === puzzle.answer.toLowerCase()
     setResult(isCorrect ? 'correct' : 'wrong')
     setTotal(t => t + 1)
-    if (isCorrect) setScore(s => s + pts)
+    if (isCorrect) {
+      setScore(s => s + pts)
+      setStreak(s => {
+        const next = s + 1
+        setBestStreak(b => {
+          const newBest = Math.max(b, next)
+          localStorage.setItem(WHOAMI_BEST_KEY, String(newBest))
+          return newBest
+        })
+        return next
+      })
+    } else {
+      setStreak(0)
+    }
   }
 
   function showNextClue() {
@@ -322,6 +404,7 @@ function WhoAmIGame() {
     if (done) return
     setResult('wrong')
     setTotal(t => t + 1)
+    setStreak(0)
   }
 
   function next() {
@@ -332,7 +415,13 @@ function WhoAmIGame() {
 
   return (
     <div className="game-area">
-      <div className="game-score">{score} pts · {total} played</div>
+      <div className="whoami-stats-row">
+        <span className="game-score">{score} pts · {total} played</span>
+        <span className="whoami-streak">
+          {streak > 0 && <span className="whoami-streak-fire">{streak >= 3 ? '🔥' : '⚡'} {streak} streak</span>}
+          {bestStreak > 0 && <span className="whoami-streak-best">Best: {bestStreak}</span>}
+        </span>
+      </div>
       <div className="game-card">
         <div className="whoami-pts-hint">
           Guess with {cluesShown} clue{cluesShown > 1 ? 's' : ''} → <strong>{pts} pt{pts > 1 ? 's' : ''}</strong>
@@ -369,7 +458,7 @@ function WhoAmIGame() {
         ) : (
           <div className="game-result">
             {result === 'correct'
-              ? <span className="game-correct-msg">✓ Correct! +{pts} pts</span>
+              ? <span className="game-correct-msg">✓ Correct! +{pts} pts{streak > 1 ? ` · ${streak} streak` : ''}</span>
               : <span className="game-wrong-msg">✗ It was {puzzle.answer}</span>
             }
             <button className="game-next-btn" onClick={next}>Next →</button>

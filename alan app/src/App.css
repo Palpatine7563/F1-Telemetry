@@ -3529,6 +3529,22 @@
 .fb-textarea::placeholder { color: #334; }
 .fb-textarea:focus { background: #080e18; }
 
+.fb-contact {
+  display: block;
+  width: 100%;
+  box-sizing: border-box;
+  background: #070d14;
+  border: none;
+  border-bottom: 1px solid #111820;
+  color: #c8d8ee;
+  font-size: 12px;
+  font-family: inherit;
+  padding: 8px 14px;
+  outline: none;
+}
+.fb-contact::placeholder { color: #334; font-style: italic; }
+.fb-contact:focus { background: #080e18; }
+
 .fb-footer {
   display: flex;
   align-items: center;
@@ -4324,4 +4340,93 @@
 @media (max-width: 500px) {
   .game-options { grid-template-columns: 1fr; }
   .games-page { padding: 16px 16px 0; }
+}
+
+/* ── Race highlights (Circuits + Drivers pages) ── */
+.highlights-toggle {
+  width: 100%;
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  padding: 7px 14px;
+  background: none;
+  border: none;
+  border-top: 1px solid #1a2330;
+  color: #445;
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.5px;
+  text-transform: uppercase;
+  cursor: pointer;
+  transition: color 0.15s, background 0.15s;
+  text-align: left;
+}
+.highlights-toggle:hover { color: #778; background: #080d13; }
+
+.highlights-list {
+  overflow: hidden;
+  max-height: 0;
+  transition: max-height 0.25s ease;
+}
+.highlights-list.open { max-height: 600px; }
+
+/* Circuit highlights rows */
+.ch-row {
+  display: grid;
+  grid-template-columns: 42px 1fr;
+  gap: 4px 8px;
+  padding: 7px 14px;
+  border-top: 1px solid #0e1620;
+  align-items: start;
+}
+.ch-row:first-child { border-top: none; }
+.ch-year {
+  font-size: 11px;
+  font-weight: 800;
+  color: #e10600;
+  font-variant-numeric: tabular-nums;
+  padding-top: 1px;
+}
+.ch-winner {
+  font-size: 12px;
+  font-weight: 600;
+  color: #aab;
+  grid-column: 2;
+}
+.ch-note {
+  font-size: 11px;
+  color: #556;
+  line-height: 1.45;
+  grid-column: 2;
+  margin: 0;
+}
+
+/* Driver highlights rows */
+.dh-row {
+  padding: 7px 12px;
+  border-top: 1px solid #0e1620;
+}
+.dh-row:first-child { border-top: none; }
+.dh-header {
+  display: flex;
+  align-items: baseline;
+  gap: 6px;
+  margin-bottom: 2px;
+}
+.dh-year {
+  font-size: 11px;
+  font-weight: 800;
+  color: #e10600;
+  font-variant-numeric: tabular-nums;
+}
+.dh-race {
+  font-size: 11px;
+  font-weight: 600;
+  color: #889;
+}
+.dh-note {
+  font-size: 11px;
+  color: #556;
+  line-height: 1.45;
+  margin: 0;
 }

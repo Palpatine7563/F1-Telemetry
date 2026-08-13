@@ -14,6 +14,7 @@ export default function FeedbackButton() {
   const [open, setOpen]       = useState(false)
   const [type, setType]       = useState<FeedbackType>('suggestion')
   const [message, setMessage] = useState('')
+  const [contact, setContact] = useState('')
   const [sent, setSent]       = useState(false)
   const textareaRef           = useRef<HTMLTextAreaElement>(null)
   const panelRef              = useRef<HTMLDivElement>(null)
@@ -49,6 +50,7 @@ export default function FeedbackButton() {
       body:    JSON.stringify({
         type:    TYPE_LABELS[type],
         message: message.trim(),
+        contact: contact.trim() || undefined,
         url:     window.location.href,
       }),
     }).catch(() => {})
@@ -57,6 +59,7 @@ export default function FeedbackButton() {
       setOpen(false)
       setSent(false)
       setMessage('')
+      setContact('')
       setType('suggestion')
     }, 2200)
   }
@@ -105,6 +108,14 @@ export default function FeedbackButton() {
               onKeyDown={e => {
                 if (e.key === 'Enter' && (e.metaKey || e.ctrlKey)) handleSubmit()
               }}
+            />
+
+            <input
+              className="fb-contact"
+              type="text"
+              placeholder="Contact (optional) — email, X, Discord…"
+              value={contact}
+              onChange={e => setContact(e.target.value)}
             />
 
             <div className="fb-footer">

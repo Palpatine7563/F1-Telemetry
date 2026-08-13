@@ -1,5 +1,7 @@
 import { useState } from 'react'
 import { CIRCUIT_DATA } from '../lib/circuitData'
+import { CIRCUIT_HIGHLIGHTS } from '../lib/raceHighlights'
+import type { CircuitHighlight } from '../lib/raceHighlights'
 
 const CIRCUIT_FLAGS: Record<string, string> = {
   australia:          '🇦🇺',
@@ -63,6 +65,121 @@ function DownforceBar({ level }: { level: string }) {
   )
 }
 
+function NotableRaces({ highlights }: { highlights: CircuitHighlight[] }) {
+  const [open, setOpen] = useState(false)
+  if (highlights.length === 0) return null
+  return (
+    <>
+      <button className="highlights-toggle" onClick={() => setOpen(o => !o)}>
+        <span>{open ? '▾' : '▸'}</span> Notable Races
+      </button>
+      <div className={`highlights-list${open ? ' open' : ''}`}>
+        {highlights.map((h, i) => (
+          <div className="ch-row" key={i}>
+            <span className="ch-year">{h.year}</span>
+            {h.winner !== 'TBD' && <span className="ch-winner">{h.winner}</span>}
+            <p className="ch-note">{h.note}</p>
+          </div>
+        ))}
+      </div>
+    </>
+  )
+}
+
+interface CircuitCardProps {
+  id: string
+}
+
+function CircuitCard({ id }: CircuitCardProps) {
+  const c = CIRCUIT_DATA[id]
+  const flag     = CIRCUIT_FLAGS[id] ?? '🏁'
+  const round    = CIRCUIT_ROUND[id] ?? '?'
+  const raceDist = (c.lengthKm * c.laps).toFixed(1)
+  const highlights = CIRCUIT_HIGHLIGHTS[id] ?? []
+
+  return (
+    <div className="circuit-card">
+
+      {/* Header */}
+      <div className="circuit-card-header">
+        <span className="circ-round">R{round}</span>
+        <span className="circ-flag">{flag}</span>
+        <div className="circ-name-block">
+          <span className="circ-country">{c.locality}, {c.country}</span>
+          <span className="circ-name">{c.fullName}</span>
+        </div>
+      </div>
+
+      {/* Type + direction badges */}
+      <div className="circ-badges">
+        <span className="circ-badge" style={{ borderColor: TYPE_COLOR[c.circuitType], color: TYPE_COLOR[c.circuitType] }}>
+          {c.circuitType}
+        </span>
+        <span className="circ-badge circ-badge-dim">
+          {c.direction === 'Clockwise' ? '↻ CW' : '↺ CCW'}
+        </span>
+        <span className="circ-badge circ-badge-dim">
+          Since {c.firstGP}
+        </span>
+      </div>
+
+      {/* Stats grid */}
+      <div className="circuit-card-stats">
+        <div className="circ-stat">
+          <span className="cs-key">Length</span>
+          <span className="cs-val">{c.length}</span>
+        </div>
+        <div className="circ-stat">
+          <span className="cs-key">Corners</span>
+          <span className="cs-val">{c.corners}</span>
+        </div>
+        <div className="circ-stat">
+          <span className="cs-key">Race Laps</span>
+          <span className="cs-val">{c.laps}</span>
+        </div>
+        <div className="circ-stat">
+          <span className="cs-key">Race Dist.</span>
+          <span className="cs-val">{raceDist} km</span>
+        </div>
+        <div className="circ-stat">
+          <span className="cs-key">DRS Zones</span>
+          <span className="cs-val">{c.drsZones}</span>
+        </div>
+        <div className="circ-stat">
+          <span className="cs-key">Top Speed</span>
+          <span className="cs-val">{c.topSpeed}</span>
+        </div>
+
+        {/* Downforce — full width */}
+        <div className="circ-stat circ-stat-wide">
+          <span className="cs-key">Downforce</span>
+          <span className="cs-val cs-val-df">
+            <span style={{ color: DOWNFORCE_COLOR[c.downforceLevel] }}>{c.downforceLevel}</span>
+            <DownforceBar level={c.downforceLevel} />
+          </span>
+        </div>
+
+        {/* Lap record — full width */}
+        <div className="circ-stat circ-stat-wide">
+          <span className="cs-key">Lap Record</span>
+          <span className="cs-val">
+            {c.lapRecord === '—'
+              ? <span className="cs-sub">No record yet</span>
+              : <>{c.lapRecord} <span className="cs-sub">{c.lapRecordHolder}, {c.lapRecordYear}</span></>
+            }
+          </span>
+        </div>
+      </div>
+
+      {/* Character note */}
+      <div className="circ-character">{c.character}</div>
+
+      {/* Notable Races */}
+      <NotableRaces highlights={highlights} />
+    </div>
+  )
+}
+
 export default function CircuitsPage() {
   const [search, setSearch] = useState('')
 
@@ -92,90 +209,9 @@ export default function CircuitsPage() {
       />
 
       <div className="circuits-grid">
-        {sorted.map(([id, c]) => {
-          const flag  = CIRCUIT_FLAGS[id] ?? '🏁'
-          const round = CIRCUIT_ROUND[id] ?? '?'
-          const raceDist = (c.lengthKm * c.laps).toFixed(1)
-
-          return (
-            <div className="circuit-card" key={id}>
-
-              {/* Header */}
-              <div className="circuit-card-header">
-                <span className="circ-round">R{round}</span>
-                <span className="circ-flag">{flag}</span>
-                <div className="circ-name-block">
-                  <span className="circ-country">{c.locality}, {c.country}</span>
-                  <span className="circ-name">{c.fullName}</span>
-                </div>
-              </div>
-
-              {/* Type + direction badges */}
-              <div className="circ-badges">
-                <span className="circ-badge" style={{ borderColor: TYPE_COLOR[c.circuitType], color: TYPE_COLOR[c.circuitType] }}>
-                  {c.circuitType}
-                </span>
-                <span className="circ-badge circ-badge-dim">
-                  {c.direction === 'Clockwise' ? '↻ CW' : '↺ CCW'}
-                </span>
-                <span className="circ-badge circ-badge-dim">
-                  Since {c.firstGP}
-                </span>
-              </div>
-
-              {/* Stats grid */}
-              <div className="circuit-card-stats">
-                <div className="circ-stat">
-                  <span className="cs-key">Length</span>
-                  <span className="cs-val">{c.length}</span>
-                </div>
-                <div className="circ-stat">
-                  <span className="cs-key">Corners</span>
-                  <span className="cs-val">{c.corners}</span>
-                </div>
-                <div className="circ-stat">
-                  <span className="cs-key">Race Laps</span>
-                  <span className="cs-val">{c.laps}</span>
-                </div>
-                <div className="circ-stat">
-                  <span className="cs-key">Race Dist.</span>
-                  <span className="cs-val">{raceDist} km</span>
-                </div>
-                <div className="circ-stat">
-                  <span className="cs-key">DRS Zones</span>
-                  <span className="cs-val">{c.drsZones}</span>
-                </div>
-                <div className="circ-stat">
-                  <span className="cs-key">Top Speed</span>
-                  <span className="cs-val">{c.topSpeed}</span>
-                </div>
-
-                {/* Downforce — full width */}
-                <div className="circ-stat circ-stat-wide">
-                  <span className="cs-key">Downforce</span>
-                  <span className="cs-val cs-val-df">
-                    <span style={{ color: DOWNFORCE_COLOR[c.downforceLevel] }}>{c.downforceLevel}</span>
-                    <DownforceBar level={c.downforceLevel} />
-                  </span>
-                </div>
-
-                {/* Lap record — full width */}
-                <div className="circ-stat circ-stat-wide">
-                  <span className="cs-key">Lap Record</span>
-                  <span className="cs-val">
-                    {c.lapRecord === '—'
-                      ? <span className="cs-sub">No record yet</span>
-                      : <>{c.lapRecord} <span className="cs-sub">{c.lapRecordHolder}, {c.lapRecordYear}</span></>
-                    }
-                  </span>
-                </div>
-              </div>
-
-              {/* Character note */}
-              <div className="circ-character">{c.character}</div>
-            </div>
-          )
-        })}
+        {sorted.map(([id]) => (
+          <CircuitCard key={id} id={id} />
+        ))}
       </div>
     </div>
   )

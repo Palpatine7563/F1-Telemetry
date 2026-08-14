@@ -3526,7 +3526,7 @@
   resize: none;
   outline: none;
 }
-.fb-textarea::placeholder { color: #334; }
+.fb-textarea::placeholder { color: #5a6a82; }
 .fb-textarea:focus { background: #080e18; }
 
 .fb-contact {
@@ -3542,7 +3542,7 @@
   padding: 8px 14px;
   outline: none;
 }
-.fb-contact::placeholder { color: #334; font-style: italic; }
+.fb-contact::placeholder { color: #5a6a82; font-style: italic; }
 .fb-contact:focus { background: #080e18; }
 
 .fb-footer {
@@ -3553,7 +3553,7 @@
 }
 .fb-hint {
   font-size: 11px;
-  color: #334;
+  color: #5a6a82;
   font-family: 'JetBrains Mono', monospace;
 }
 .fb-submit {

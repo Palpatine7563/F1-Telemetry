@@ -44,7 +44,7 @@ export const CIRCUIT_DATA: Record<string, CircuitData> = {
     locality: 'Suzuka', country: 'Japan',
     length: '5.807 km', lengthKm: 5.807, laps: 53,
     lapRecord: '1:30.983', lapRecordHolder: 'Valtteri Bottas', lapRecordYear: 2019,
-    drsZones: 1, corners: 18, direction: 'Clockwise',
+    drsZones: 1, corners: 18, direction: 'Mixed (Figure-8)',
     topSpeed: '315 km/h', downforceLevel: 'High', circuitType: 'Permanent',
     firstGP: 1987,
     character: 'The only figure-of-eight circuit on the calendar. Iconic 130R and the Esses demand extreme aero commitment — considered the ultimate driver\'s circuit.',

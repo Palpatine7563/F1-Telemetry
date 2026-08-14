@@ -116,7 +116,7 @@ function CircuitCard({ id }: CircuitCardProps) {
           {c.circuitType}
         </span>
         <span className="circ-badge circ-badge-dim">
-          {c.direction === 'Clockwise' ? '↻ CW' : '↺ CCW'}
+          {c.direction === 'Clockwise' ? '↻ CW' : c.direction === 'Anti-Clockwise' ? '↺ CCW' : '⇄ Mixed'}
         </span>
         <span className="circ-badge circ-badge-dim">
           Since {c.firstGP}

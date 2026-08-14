@@ -10,7 +10,7 @@ export interface CircuitData {
   lapRecordYear: number
   drsZones: number
   corners: number
-  direction: 'Clockwise' | 'Anti-clockwise'
+  direction: 'Clockwise' | 'Anti-clockwise' | 'Mixed (Figure-8)'
   topSpeed: string
   downforceLevel: 'Very Low' | 'Low' | 'Medium' | 'High'
   circuitType: 'Permanent' | 'Street' | 'Semi-Permanent'

@@ -504,7 +504,7 @@ function WhoAmIGame({ authUser, onSignIn }: { authUser: User | null; onSignIn?: 
   const [input, setInput] = useState('')
   const [result, setResult] = useState<'correct' | 'wrong' | null>(null)
   const [score, setScore] = useState(0)
-  const [total, setTotal] = useState(0)
+
   const [streak, setStreak] = useState(0)
   const [bestStreak, setBestStreak] = useState(() => {
     const saved = parseInt(localStorage.getItem(WHOAMI_BEST_KEY) ?? '0', 10)
@@ -550,7 +550,6 @@ function WhoAmIGame({ authUser, onSignIn }: { authUser: User | null; onSignIn?: 
     if (done || !input.trim()) return
     const isCorrect = checkAnswer(input, puzzle.answer)
     setResult(isCorrect ? 'correct' : 'wrong')
-    setTotal(t => t + 1)
     const newScore = isCorrect ? score + pts : score
     if (isCorrect) {
       setScore(newScore)
@@ -577,7 +576,6 @@ function WhoAmIGame({ authUser, onSignIn }: { authUser: User | null; onSignIn?: 
   function giveUp() {
     if (done) return
     setResult('wrong')
-    setTotal(t => t + 1)
     setStreak(0)
     finishPlay(score)
   }

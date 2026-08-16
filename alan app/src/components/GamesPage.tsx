@@ -1,14 +1,15 @@
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import type { User } from '@supabase/supabase-js'
 import { CIRCUIT_DATA } from '../lib/circuitData'
 import DailyChallenge from './DailyChallenge'
+import { supabase } from '../lib/supabase'
 
 interface Props {
   authUser: User | null
   onSignIn?: () => void
 }
 
-type GameTab = 'circuit' | 'whoami' | 'trivia' | 'challenge'
+type GameTab = 'circuit' | 'whoami' | 'trivia' | 'challenge' | 'leaderboard'
 
 // ── Helpers ──────────────────────────────────────────────────────────────────
 
@@ -32,6 +33,100 @@ function shuffleArr<T>(arr: T[]): T[] {
 function makeCircuitRound() {
   const key = CIRCUIT_KEYS[Math.floor(Math.random() * CIRCUIT_KEYS.length)]
   return { key, options: pickOptions(key, CIRCUIT_KEYS) }
+}
+
+// ── Daily limit helpers ───────────────────────────────────────────────────────
+
+const MAX_DAILY = 5
+const DAILY_KEYS = { circuit: 'f1vis_daily_circuit', whoami: 'f1vis_daily_whoami' }
+const FINAL_KEYS = { circuit: 'f1vis_final_circuit', whoami: 'f1vis_final_whoami' }
+
+function getTodayStr(): string {
+  return new Date().toISOString().slice(0, 10)
+}
+
+function getDailyPlays(game: 'circuit' | 'whoami'): number {
+  try {
+    const raw = localStorage.getItem(DAILY_KEYS[game])
+    if (!raw) return 0
+    const { date, count } = JSON.parse(raw)
+    return date === getTodayStr() ? (count as number) : 0
+  } catch { return 0 }
+}
+
+function incrementDailyPlays(game: 'circuit' | 'whoami'): number {
+  const next = getDailyPlays(game) + 1
+  localStorage.setItem(DAILY_KEYS[game], JSON.stringify({ date: getTodayStr(), count: next }))
+  return next
+}
+
+function getDailyFinal(game: 'circuit' | 'whoami'): { score: number; maxScore: number } | null {
+  try {
+    const raw = localStorage.getItem(FINAL_KEYS[game])
+    if (!raw) return null
+    const { date, score, maxScore } = JSON.parse(raw)
+    return date === getTodayStr() ? { score, maxScore } : null
+  } catch { return null }
+}
+
+function saveDailyFinal(game: 'circuit' | 'whoami', score: number, maxScore: number) {
+  localStorage.setItem(FINAL_KEYS[game], JSON.stringify({ date: getTodayStr(), score, maxScore }))
+}
+
+function timeUntilMidnight(): string {
+  const now = new Date()
+  const midnight = new Date(now)
+  midnight.setHours(24, 0, 0, 0)
+  const ms = midnight.getTime() - now.getTime()
+  const h = Math.floor(ms / 3600000)
+  const m = Math.floor((ms % 3600000) / 60000)
+  return h > 0 ? `${h}h ${m}m` : `${m}m`
+}
+
+async function submitScore(userId: string, displayName: string, gameType: 'circuit' | 'whoami', score: number, maxScore: number) {
+  await supabase.from('game_scores').upsert(
+    { user_id: userId, display_name: displayName, game_type: gameType, score, max_score: maxScore, date: getTodayStr() },
+    { onConflict: 'user_id,game_type,date' },
+  )
+}
+
+// ── Daily-over screen ─────────────────────────────────────────────────────────
+
+interface DailyOverProps {
+  gameType: 'circuit' | 'whoami'
+  score: number
+  maxScore: number
+  authUser: User | null
+  onSignIn?: () => void
+  submitted: boolean
+}
+
+function DailyOverScreen({ gameType, score, maxScore, authUser, onSignIn, submitted }: DailyOverProps) {
+  const label = gameType === 'circuit' ? 'Circuit ID' : 'Who Am I?'
+  const pct = score / maxScore
+  const msg =
+    pct === 1 ? 'Perfect score!' :
+    pct >= 0.8 ? 'Great session!' :
+    pct >= 0.5 ? 'Solid effort!' : 'Keep practicing!'
+  return (
+    <div className="game-area">
+      <div className="game-card game-finished">
+        <p className="game-finish-headline">🏁 Today's {label} done!</p>
+        <p className="game-finish-score">
+          {gameType === 'circuit' ? `${score} / ${maxScore} correct` : `${score} / ${maxScore} pts`}
+        </p>
+        <p className="game-finish-msg">{msg}</p>
+        {submitted ? (
+          <p className="daily-over-saved">✓ Score saved to leaderboard</p>
+        ) : authUser ? (
+          <p className="daily-over-saved">✓ Score saved</p>
+        ) : (
+          <button className="game-next-btn" onClick={onSignIn}>Sign in to save score</button>
+        )}
+        <p className="daily-over-reset">Resets in {timeUntilMidnight()}</p>
+      </div>
+    </div>
+  )
 }
 
 // ── Driver puzzles ────────────────────────────────────────────────────────────
@@ -299,29 +394,59 @@ const TRIVIA_BANK: TriviaQ[] = [
 
 // ── Circuit ID game ───────────────────────────────────────────────────────────
 
-function CircuitGame() {
-  const [round, setRound] = useState<{ key: string; options: string[] }>(makeCircuitRound)
+function CircuitGame({ authUser, onSignIn }: { authUser: User | null; onSignIn?: () => void }) {
+  const [round, setRound]       = useState<{ key: string; options: string[] }>(makeCircuitRound)
   const [selected, setSelected] = useState<string | null>(null)
-  const [score, setScore] = useState(0)
-  const [total, setTotal] = useState(0)
+  const [score, setScore]       = useState(0)
+  const [playsUsed, setPlaysUsed] = useState(() => getDailyPlays('circuit'))
+  const [dayOver, setDayOver]   = useState(() => getDailyPlays('circuit') >= MAX_DAILY)
+  const [finalScore, setFinalScore] = useState(() => getDailyFinal('circuit'))
+  const [submitted, setSubmitted] = useState(false)
 
   const data = CIRCUIT_DATA[round.key]
+  const playsLeft = MAX_DAILY - playsUsed
+
+  if (dayOver) {
+    return <DailyOverScreen
+      gameType="circuit"
+      score={finalScore?.score ?? 0}
+      maxScore={finalScore?.maxScore ?? MAX_DAILY}
+      authUser={authUser}
+      onSignIn={onSignIn}
+      submitted={submitted}
+    />
+  }
 
   function guess(key: string) {
     if (selected !== null) return
     setSelected(key)
-    setTotal(t => t + 1)
-    if (key === round.key) setScore(s => s + 1)
+    const isCorrect = key === round.key
+    const newScore = isCorrect ? score + 1 : score
+    if (isCorrect) setScore(newScore)
+
+    const newPlays = incrementDailyPlays('circuit')
+    setPlaysUsed(newPlays)
+
+    if (newPlays >= MAX_DAILY) {
+      const fs = { score: newScore, maxScore: MAX_DAILY }
+      setFinalScore(fs)
+      saveDailyFinal('circuit', fs.score, fs.maxScore)
+      if (authUser) {
+        void submitScore(authUser.id, authUser.email?.split('@')[0] ?? 'Player', 'circuit', fs.score, fs.maxScore)
+        setSubmitted(true)
+      }
+    }
   }
 
   function next() {
+    if (playsUsed >= MAX_DAILY) { setDayOver(true); return }
     setRound(makeCircuitRound())
     setSelected(null)
   }
 
   return (
     <div className="game-area">
-      <div className="game-score">{score} / {total} correct</div>
+      <div className="game-score">{score} correct · {playsLeft} play{playsLeft !== 1 ? 's' : ''} left today</div>
       <div className="game-card">
         <div className="circuit-clue-box">
           <div className="circuit-clue-stats">
@@ -358,7 +483,9 @@ function CircuitGame() {
               ? <span className="game-correct-msg">✓ Correct!</span>
               : <span className="game-wrong-msg">✗ {CIRCUIT_DATA[round.key].fullName}</span>
             }
-            <button className="game-next-btn" onClick={next}>Next →</button>
+            <button className="game-next-btn" onClick={next}>
+              {playsUsed >= MAX_DAILY ? 'See Results →' : 'Next →'}
+            </button>
           </div>
         )}
       </div>
@@ -372,7 +499,7 @@ const MAX_CLUES = 4
 const PTS_BY_CLUES = [4, 3, 2, 1]
 const WHOAMI_BEST_KEY = 'f1vis_whoami_best'
 
-function WhoAmIGame() {
+function WhoAmIGame({ authUser, onSignIn }: { authUser: User | null; onSignIn?: () => void }) {
   const [state, setState] = useState<{ puzzle: DriverPuzzle; cluesShown: number }>(makeDriverPuzzle)
   const [input, setInput] = useState('')
   const [result, setResult] = useState<'correct' | 'wrong' | null>(null)
@@ -383,18 +510,50 @@ function WhoAmIGame() {
     const saved = parseInt(localStorage.getItem(WHOAMI_BEST_KEY) ?? '0', 10)
     return isNaN(saved) ? 0 : saved
   })
+  const [playsUsed, setPlaysUsed]   = useState(() => getDailyPlays('whoami'))
+  const [dayOver, setDayOver]       = useState(() => getDailyPlays('whoami') >= MAX_DAILY)
+  const [finalScore, setFinalScore] = useState(() => getDailyFinal('whoami'))
+  const [submitted, setSubmitted]   = useState(false)
 
   const { puzzle, cluesShown } = state
   const pts = PTS_BY_CLUES[cluesShown - 1] ?? 1
   const done = result !== null
+  const playsLeft = MAX_DAILY - playsUsed
+  const WHOAMI_MAX = MAX_DAILY * 4
+
+  if (dayOver) {
+    return <DailyOverScreen
+      gameType="whoami"
+      score={finalScore?.score ?? 0}
+      maxScore={finalScore?.maxScore ?? WHOAMI_MAX}
+      authUser={authUser}
+      onSignIn={onSignIn}
+      submitted={submitted}
+    />
+  }
+
+  function finishPlay(newScore: number) {
+    const newPlays = incrementDailyPlays('whoami')
+    setPlaysUsed(newPlays)
+    if (newPlays >= MAX_DAILY) {
+      const fs = { score: newScore, maxScore: WHOAMI_MAX }
+      setFinalScore(fs)
+      saveDailyFinal('whoami', fs.score, fs.maxScore)
+      if (authUser) {
+        void submitScore(authUser.id, authUser.email?.split('@')[0] ?? 'Player', 'whoami', fs.score, fs.maxScore)
+        setSubmitted(true)
+      }
+    }
+  }
 
   function submit() {
     if (done || !input.trim()) return
     const isCorrect = checkAnswer(input, puzzle.answer)
     setResult(isCorrect ? 'correct' : 'wrong')
     setTotal(t => t + 1)
+    const newScore = isCorrect ? score + pts : score
     if (isCorrect) {
-      setScore(s => s + pts)
+      setScore(newScore)
       setStreak(s => {
         const next = s + 1
         setBestStreak(b => {
@@ -407,6 +566,7 @@ function WhoAmIGame() {
     } else {
       setStreak(0)
     }
+    finishPlay(newScore)
   }
 
   function showNextClue() {
@@ -419,9 +579,11 @@ function WhoAmIGame() {
     setResult('wrong')
     setTotal(t => t + 1)
     setStreak(0)
+    finishPlay(score)
   }
 
   function next() {
+    if (playsUsed >= MAX_DAILY) { setDayOver(true); return }
     setState(makeDriverPuzzle())
     setInput('')
     setResult(null)
@@ -430,7 +592,7 @@ function WhoAmIGame() {
   return (
     <div className="game-area">
       <div className="whoami-stats-row">
-        <span className="game-score">{score} pts · {total} played</span>
+        <span className="game-score">{score} pts · {playsLeft} play{playsLeft !== 1 ? 's' : ''} left today</span>
         <span className="whoami-streak">
           {streak > 0 && <span className="whoami-streak-fire">{streak >= 3 ? '🔥' : '⚡'} {streak} streak</span>}
           {bestStreak > 0 && <span className="whoami-streak-best">Best: {bestStreak}</span>}
@@ -475,7 +637,9 @@ function WhoAmIGame() {
               ? <span className="game-correct-msg">✓ Correct! +{pts} pts{streak > 1 ? ` · ${streak} streak` : ''}</span>
               : <span className="game-wrong-msg">✗ It was {puzzle.answer}</span>
             }
-            <button className="game-next-btn" onClick={next}>Next →</button>
+            <button className="game-next-btn" onClick={next}>
+              {playsUsed >= MAX_DAILY ? 'See Results →' : 'Next →'}
+            </button>
           </div>
         )}
       </div>
@@ -571,6 +735,87 @@ function TriviaGame() {
   )
 }
 
+// ── Leaderboard ───────────────────────────────────────────────────────────────
+
+type LbGame   = 'circuit' | 'whoami'
+type LbPeriod = 'today' | 'alltime'
+
+interface ScoreRow {
+  display_name: string
+  score: number
+  max_score: number
+  date?: string
+}
+
+function Leaderboard() {
+  const [game, setGame]     = useState<LbGame>('circuit')
+  const [period, setPeriod] = useState<LbPeriod>('today')
+  const [rows, setRows]     = useState<ScoreRow[]>([])
+  const [loading, setLoading] = useState(true)
+
+  useEffect(() => {
+    setLoading(true)
+    const run = async () => {
+      const base = supabase
+        .from('game_scores')
+        .select('display_name, score, max_score, date')
+        .eq('game_type', game)
+        .order('score', { ascending: false })
+        .limit(10)
+      const { data } = period === 'today'
+        ? await base.eq('date', getTodayStr())
+        : await base
+      setRows(data ?? [])
+      setLoading(false)
+    }
+    void run()
+  }, [game, period])
+
+  const medals = ['🥇', '🥈', '🥉']
+
+  return (
+    <div className="game-area">
+      <div className="lb-filters">
+        <div className="lb-filter-row">
+          {(['circuit', 'whoami'] as LbGame[]).map(g => (
+            <button key={g} className={`lb-pill ${game === g ? 'active' : ''}`} onClick={() => setGame(g)}>
+              {g === 'circuit' ? '🗺 Circuit ID' : '👤 Who Am I?'}
+            </button>
+          ))}
+        </div>
+        <div className="lb-filter-row">
+          {(['today', 'alltime'] as LbPeriod[]).map(p => (
+            <button key={p} className={`lb-pill ${period === p ? 'active' : ''}`} onClick={() => setPeriod(p)}>
+              {p === 'today' ? 'Today' : 'All time'}
+            </button>
+          ))}
+        </div>
+      </div>
+
+      {loading ? (
+        <div className="lb-empty">Loading…</div>
+      ) : rows.length === 0 ? (
+        <div className="lb-empty">No scores yet — be the first!</div>
+      ) : (
+        <div className="lb-table">
+          {rows.map((row, i) => (
+            <div key={i} className={`lb-row${i === 0 ? ' lb-row-gold' : i === 1 ? ' lb-row-silver' : i === 2 ? ' lb-row-bronze' : ''}`}>
+              <span className="lb-rank">{medals[i] ?? i + 1}</span>
+              <span className="lb-name">{row.display_name}</span>
+              <span className="lb-score">
+                {game === 'circuit' ? `${row.score} / ${row.max_score}` : `${row.score} pts`}
+              </span>
+              {period === 'alltime' && row.date && (
+                <span className="lb-date">{row.date}</span>
+              )}
+            </div>
+          ))}
+        </div>
+      )}
+    </div>
+  )
+}
+
 // ── Page ──────────────────────────────────────────────────────────────────────
 
 export default function GamesPage({ authUser, onSignIn }: Props) {
@@ -580,7 +825,7 @@ export default function GamesPage({ authUser, onSignIn }: Props) {
     <div className="games-page">
       <div className="games-header">
         <h1 className="games-title">F1 Games</h1>
-        <p className="games-sub">Test your Formula 1 knowledge with three mini-games</p>
+        <p className="games-sub">5 plays per day on Circuit ID and Who Am I? — scores go to the leaderboard</p>
       </div>
 
       <div className="games-tab-bar">
@@ -608,13 +853,20 @@ export default function GamesPage({ authUser, onSignIn }: Props) {
         >
           📅 Daily Challenge
         </button>
+        <button
+          className={`games-tab ${tab === 'leaderboard' ? 'active' : ''}`}
+          onClick={() => setTab('leaderboard')}
+        >
+          🏆 Leaderboard
+        </button>
       </div>
 
       <div className="games-content">
-        {tab === 'circuit' && <CircuitGame />}
-        {tab === 'whoami' && <WhoAmIGame />}
+        {tab === 'circuit' && <CircuitGame authUser={authUser} onSignIn={onSignIn} />}
+        {tab === 'whoami' && <WhoAmIGame authUser={authUser} onSignIn={onSignIn} />}
         {tab === 'trivia' && <TriviaGame />}
         {tab === 'challenge' && <DailyChallenge />}
+        {tab === 'leaderboard' && <Leaderboard />}
       </div>
 
       {!authUser && (

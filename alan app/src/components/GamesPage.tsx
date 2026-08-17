@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useRef } from 'react'
 import type { User } from '@supabase/supabase-js'
 import { CIRCUIT_DATA } from '../lib/circuitData'
 import DailyChallenge from './DailyChallenge'
@@ -58,6 +58,19 @@ function incrementDailyPlays(game: 'circuit' | 'whoami'): number {
   const next = getDailyPlays(game) + 1
   localStorage.setItem(DAILY_KEYS[game], JSON.stringify({ date: getTodayStr(), count: next }))
   return next
+}
+
+function getDailyScore(game: 'circuit' | 'whoami'): number {
+  try {
+    const raw = localStorage.getItem(`f1vis_score_${game}`)
+    if (!raw) return 0
+    const { date, score } = JSON.parse(raw)
+    return date === getTodayStr() ? (score as number) : 0
+  } catch { return 0 }
+}
+
+function saveDailyScore(game: 'circuit' | 'whoami', score: number) {
+  localStorage.setItem(`f1vis_score_${game}`, JSON.stringify({ date: getTodayStr(), score }))
 }
 
 function getDailyFinal(game: 'circuit' | 'whoami'): { score: number; maxScore: number } | null {
@@ -397,11 +410,12 @@ const TRIVIA_BANK: TriviaQ[] = [
 function CircuitGame({ authUser, onSignIn }: { authUser: User | null; onSignIn?: () => void }) {
   const [round, setRound]       = useState<{ key: string; options: string[] }>(makeCircuitRound)
   const [selected, setSelected] = useState<string | null>(null)
-  const [score, setScore]       = useState(0)
+  const [score, setScore]       = useState(() => getDailyScore('circuit'))
   const [playsUsed, setPlaysUsed] = useState(() => getDailyPlays('circuit'))
   const [dayOver, setDayOver]   = useState(() => getDailyPlays('circuit') >= MAX_DAILY)
   const [finalScore, setFinalScore] = useState(() => getDailyFinal('circuit'))
   const [submitted, setSubmitted] = useState(false)
+  const scoreRef = useRef(getDailyScore('circuit'))
 
   const data = CIRCUIT_DATA[round.key]
   const playsLeft = MAX_DAILY - playsUsed
@@ -409,7 +423,7 @@ function CircuitGame({ authUser, onSignIn }: { authUser: User | null; onSignIn?:
   if (dayOver) {
     return <DailyOverScreen
       gameType="circuit"
-      score={finalScore?.score ?? 0}
+      score={finalScore?.score ?? score}
       maxScore={finalScore?.maxScore ?? MAX_DAILY}
       authUser={authUser}
       onSignIn={onSignIn}
@@ -421,14 +435,17 @@ function CircuitGame({ authUser, onSignIn }: { authUser: User | null; onSignIn?:
     if (selected !== null) return
     setSelected(key)
     const isCorrect = key === round.key
-    const newScore = isCorrect ? score + 1 : score
-    if (isCorrect) setScore(newScore)
+    if (isCorrect) {
+      scoreRef.current += 1
+      setScore(scoreRef.current)
+      saveDailyScore('circuit', scoreRef.current)
+    }
 
     const newPlays = incrementDailyPlays('circuit')
     setPlaysUsed(newPlays)
 
     if (newPlays >= MAX_DAILY) {
-      const fs = { score: newScore, maxScore: MAX_DAILY }
+      const fs = { score: scoreRef.current, maxScore: MAX_DAILY }
       setFinalScore(fs)
       saveDailyFinal('circuit', fs.score, fs.maxScore)
       if (authUser) {
@@ -503,7 +520,8 @@ function WhoAmIGame({ authUser, onSignIn }: { authUser: User | null; onSignIn?: 
   const [state, setState] = useState<{ puzzle: DriverPuzzle; cluesShown: number }>(makeDriverPuzzle)
   const [input, setInput] = useState('')
   const [result, setResult] = useState<'correct' | 'wrong' | null>(null)
-  const [score, setScore] = useState(0)
+  const [score, setScore] = useState(() => getDailyScore('whoami'))
+  const scoreRef = useRef(getDailyScore('whoami'))
 
   const [streak, setStreak] = useState(0)
   const [bestStreak, setBestStreak] = useState(() => {
@@ -524,7 +542,7 @@ function WhoAmIGame({ authUser, onSignIn }: { authUser: User | null; onSignIn?: 
   if (dayOver) {
     return <DailyOverScreen
       gameType="whoami"
-      score={finalScore?.score ?? 0}
+      score={finalScore?.score ?? score}
       maxScore={finalScore?.maxScore ?? WHOAMI_MAX}
       authUser={authUser}
       onSignIn={onSignIn}
@@ -550,9 +568,10 @@ function WhoAmIGame({ authUser, onSignIn }: { authUser: User | null; onSignIn?: 
     if (done || !input.trim()) return
     const isCorrect = checkAnswer(input, puzzle.answer)
     setResult(isCorrect ? 'correct' : 'wrong')
-    const newScore = isCorrect ? score + pts : score
     if (isCorrect) {
-      setScore(newScore)
+      scoreRef.current += pts
+      setScore(scoreRef.current)
+      saveDailyScore('whoami', scoreRef.current)
       setStreak(s => {
         const next = s + 1
         setBestStreak(b => {
@@ -565,7 +584,7 @@ function WhoAmIGame({ authUser, onSignIn }: { authUser: User | null; onSignIn?: 
     } else {
       setStreak(0)
     }
-    finishPlay(newScore)
+    finishPlay(scoreRef.current)
   }
 
   function showNextClue() {
@@ -577,7 +596,7 @@ function WhoAmIGame({ authUser, onSignIn }: { authUser: User | null; onSignIn?: 
     if (done) return
     setResult('wrong')
     setStreak(0)
-    finishPlay(score)
+    finishPlay(scoreRef.current)
   }
 
   function next() {

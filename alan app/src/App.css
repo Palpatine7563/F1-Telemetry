@@ -3991,6 +3991,7 @@
 
 .games-tab-bar {
   display: flex;
+  flex-wrap: wrap;
   gap: 8px;
   border-bottom: 1px solid #1a2540;
   padding-bottom: 12px;

@@ -7,9 +7,9 @@ export interface DriverInfo {
 }
 
 export const DRIVER_INFO: Record<string, DriverInfo> = {
-  VER: { firstName: 'Max',       lastName: 'Verstappen', number: 1,  team: 'Red Bull Racing', flag: '🇳🇱' },
+  VER: { firstName: 'Max',       lastName: 'Verstappen', number: 33, team: 'Red Bull Racing', flag: '🇳🇱' },
   LAW: { firstName: 'Liam',      lastName: 'Lawson',     number: 30, team: 'Racing Bulls',    flag: '🇳🇿' },
-  NOR: { firstName: 'Lando',     lastName: 'Norris',     number: 4,  team: 'McLaren',         flag: '🇬🇧' },
+  NOR: { firstName: 'Lando',     lastName: 'Norris',     number: 1,  team: 'McLaren',         flag: '🇬🇧' },
   PIA: { firstName: 'Oscar',     lastName: 'Piastri',    number: 81, team: 'McLaren',         flag: '🇦🇺' },
   LEC: { firstName: 'Charles',   lastName: 'Leclerc',    number: 16, team: 'Ferrari',         flag: '🇲🇨' },
   SAI: { firstName: 'Carlos',    lastName: 'Sainz',      number: 55, team: 'Williams',        flag: '🇪🇸' },
@@ -19,7 +19,7 @@ export const DRIVER_INFO: Record<string, DriverInfo> = {
   BEA: { firstName: 'Oliver',    lastName: 'Bearman',    number: 87, team: 'Haas F1 Team',    flag: '🇬🇧' },
   ALO: { firstName: 'Fernando',  lastName: 'Alonso',     number: 14, team: 'Aston Martin',   flag: '🇪🇸' },
   STR: { firstName: 'Lance',     lastName: 'Stroll',     number: 18, team: 'Aston Martin',   flag: '🇨🇦' },
-  LIN: { firstName: 'Arvid',     lastName: 'Lindblad',   number: 7,  team: 'Racing Bulls',   flag: '🇬🇧' },
+  LIN: { firstName: 'Arvid',     lastName: 'Lindblad',   number: 41, team: 'Racing Bulls',   flag: '🇬🇧' },
   OCO: { firstName: 'Esteban',   lastName: 'Ocon',       number: 31, team: 'Haas F1 Team',   flag: '🇫🇷' },
   GAS: { firstName: 'Pierre',    lastName: 'Gasly',      number: 10, team: 'Alpine',          flag: '🇫🇷' },
   COL: { firstName: 'Franco',    lastName: 'Colapinto',  number: 43, team: 'Alpine',          flag: '🇦🇷' },

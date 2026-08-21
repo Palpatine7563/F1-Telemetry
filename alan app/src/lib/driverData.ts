@@ -8,7 +8,8 @@ export interface DriverInfo {
 
 export const DRIVER_INFO: Record<string, DriverInfo> = {
   VER: { firstName: 'Max',       lastName: 'Verstappen', number: 33, team: 'Red Bull Racing', flag: '🇳🇱' },
-  LAW: { firstName: 'Liam',      lastName: 'Lawson',     number: 30, team: 'Racing Bulls',    flag: '🇳🇿' },
+  LAW: { firstName: 'Liam',      lastName: 'Lawson',     number: 30, team: 'Red Bull Racing', flag: '🇳🇿' },
+  TSU: { firstName: 'Yuki',      lastName: 'Tsunoda',    number: 22, team: 'Racing Bulls',    flag: '🇯🇵' },
   NOR: { firstName: 'Lando',     lastName: 'Norris',     number: 1,  team: 'McLaren',         flag: '🇬🇧' },
   PIA: { firstName: 'Oscar',     lastName: 'Piastri',    number: 81, team: 'McLaren',         flag: '🇦🇺' },
   LEC: { firstName: 'Charles',   lastName: 'Leclerc',    number: 16, team: 'Ferrari',         flag: '🇲🇨' },

@@ -1,4 +1,4 @@
-type AppView = 'telemetry' | 'standings' | 'calendar' | 'results' | 'drivers' | 'teams' | 'circuits' | 'pace' | 'pace2' | 'insights' | 'games' | 'historicalraces' | 'privacy' | 'about' | 'disclaimer' | 'changelog'
+type AppView = 'telemetry' | 'standings' | 'calendar' | 'results' | 'drivers' | 'teams' | 'circuits' | 'pace' | 'pace2' | 'insights' | 'games' | 'historicalraces' | 'socials' | 'privacy' | 'about' | 'disclaimer' | 'changelog'
 
 interface Props {
   active: AppView
@@ -18,6 +18,7 @@ const NAV: { id: AppView; icon: string; label: string; title: string }[] = [
   { id: 'insights',   icon: '📝', label: 'Insights',  title: 'Race Insights' },
   { id: 'games',           icon: '🎮', label: 'Games',     title: 'F1 Games' },
   { id: 'historicalraces', icon: '⚡', label: 'Classics',  title: 'Historic Race Replays' },
+  { id: 'socials',          icon: '💬', label: 'Socials',    title: 'Community & Socials' },
   { id: 'changelog',       icon: '📣', label: "What's New", title: "What's New" },
 ]
 

@@ -8,7 +8,7 @@ const COUNTRY_FLAG: Record<string, string> = {
   'United Kingdom': '🇬🇧', UK: '🇬🇧', Belgium: '🇧🇪', Hungary: '🇭🇺', Netherlands: '🇳🇱',
   Italy: '🇮🇹', Azerbaijan: '🇦🇿', Singapore: '🇸🇬', Mexico: '🇲🇽',
   Brazil: '🇧🇷', 'United Arab Emirates': '🇦🇪', UAE: '🇦🇪', Qatar: '🇶🇦',
-  Bahrain: '🇧🇭',
+  Bahrain: '🇧🇭', Malaysia: '🇲🇾', Netherlands: '🇳🇱',
 }
 
 function raceStatus(dateStr: string): 'past' | 'upcoming' | 'next' {

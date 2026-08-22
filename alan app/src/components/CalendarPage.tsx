@@ -3,11 +3,12 @@ import { fetchSchedule } from '../lib/f1Api'
 import type { Race } from '../lib/f1Api'
 
 const COUNTRY_FLAG: Record<string, string> = {
-  Australia: '🇦🇺', China: '🇨🇳', Japan: '🇯🇵', 'United States': '🇺🇸',
+  Australia: '🇦🇺', China: '🇨🇳', Japan: '🇯🇵', 'United States': '🇺🇸', USA: '🇺🇸',
   Canada: '🇨🇦', Monaco: '🇲🇨', Spain: '🇪🇸', Austria: '🇦🇹',
-  'United Kingdom': '🇬🇧', Belgium: '🇧🇪', Hungary: '🇭🇺', Netherlands: '🇳🇱',
+  'United Kingdom': '🇬🇧', UK: '🇬🇧', Belgium: '🇧🇪', Hungary: '🇭🇺', Netherlands: '🇳🇱',
   Italy: '🇮🇹', Azerbaijan: '🇦🇿', Singapore: '🇸🇬', Mexico: '🇲🇽',
-  Brazil: '🇧🇷', 'United Arab Emirates': '🇦🇪', Qatar: '🇶🇦',
+  Brazil: '🇧🇷', 'United Arab Emirates': '🇦🇪', UAE: '🇦🇪', Qatar: '🇶🇦',
+  Bahrain: '🇧🇭',
 }
 
 function raceStatus(dateStr: string): 'past' | 'upcoming' | 'next' {

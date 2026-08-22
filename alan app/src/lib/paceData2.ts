@@ -14,10 +14,11 @@ export interface Race2 {
 }
 
 export const RACES2: Race2[] = [
-  { label: 'Austria',  fullName: 'Austria GP',                       eventKey: 'fastf1_2025_austrian_grand_prix', imgPrefix: '08_austria_2025' },
-  { label: 'Britain',  fullName: 'British GP / Silverstone',         eventKey: 'fastf1_2025_british_grand_prix',  imgPrefix: '10_silverstone_2025' },
-  { label: 'Belgium',  fullName: 'Belgium GP / Spa-Francorchamps',   eventKey: 'fastf1_2025_belgian_grand_prix',  imgPrefix: '09_spa_francorchamps_2025' },
+  { label: 'Austria',  fullName: 'Austria GP',                       eventKey: 'fastf1_2025_austrian_grand_prix',  imgPrefix: '08_austria_2025' },
+  { label: 'Britain',  fullName: 'British GP / Silverstone',         eventKey: 'fastf1_2025_british_grand_prix',   imgPrefix: '10_silverstone_2025' },
+  { label: 'Belgium',  fullName: 'Belgium GP / Spa-Francorchamps',   eventKey: 'fastf1_2025_belgian_grand_prix',   imgPrefix: '09_spa_francorchamps_2025' },
   { label: 'Hungary',  fullName: 'Hungary GP / Hungaroring',         eventKey: 'fastf1_2025_hungarian_grand_prix', imgPrefix: '11_hungaroring_2025' },
+  { label: 'Dutch',    fullName: 'Dutch GP / Zandvoort',             eventKey: 'fastf1_2025_dutch_grand_prix',     imgPrefix: '12_zandvoort_2025' },
 ]
 
 // ── Driver qualifying predictions ────────────────────────────────────────────
@@ -36,25 +37,29 @@ export interface DriverPrediction {
   teamDelta: number
 }
 
-export async function loadDriverPredictions(): Promise<DriverPrediction[]> {
-  const res = await fetch('/pace2/predictions/qualifying_time_predictions/driver_qualifying_predictions/four_race_2026_driver_qualifying_predictions.csv')
-  if (!res.ok) throw new Error(`HTTP ${res.status}`)
+const DRIVER_PRED_BASE = '/pace2/predictions/qualifying_time_predictions/driver_qualifying_predictions'
 
-  type Raw = {
-    prediction_target_race: string
-    predicted_position: string
-    driver: string
-    driver_number: string
-    team: string
-    predicted_qualifying_time: string
-    predicted_qualifying_seconds: string
-    gap_to_predicted_pole_seconds: string
-    model_pole_time: string
-    model_pole_seconds: string
-    target_team_delta_pct_vs_mercedes: string
-  }
+const DRIVER_PRED_CSVS = [
+  `${DRIVER_PRED_BASE}/four_race_2026_driver_qualifying_predictions.csv`,
+  `${DRIVER_PRED_BASE}/zandvoort_2026_driver_qualifying_predictions_recency_weighted.csv`,
+]
 
-  return parseCsv<Raw>(await res.text()).map(r => ({
+type RawDriverPred = {
+  prediction_target_race: string
+  predicted_position: string
+  driver: string
+  driver_number: string
+  team: string
+  predicted_qualifying_time: string
+  predicted_qualifying_seconds: string
+  gap_to_predicted_pole_seconds: string
+  model_pole_time: string
+  model_pole_seconds: string
+  target_team_delta_pct_vs_mercedes: string
+}
+
+function parseDriverPredRows(text: string): DriverPrediction[] {
+  return parseCsv<RawDriverPred>(text).map(r => ({
     race:             r.prediction_target_race,
     position:         parseInt(r.predicted_position, 10),
     driver:           r.driver,
@@ -67,6 +72,15 @@ export async function loadDriverPredictions(): Promise<DriverPrediction[]> {
     poleSeconds:      parseFloat(r.model_pole_seconds),
     teamDelta:        parseFloat(r.target_team_delta_pct_vs_mercedes),
   }))
+}
+
+export async function loadDriverPredictions(): Promise<DriverPrediction[]> {
+  const results = await Promise.all(
+    DRIVER_PRED_CSVS.map(url =>
+      fetch(url).then(r => r.ok ? r.text() : Promise.reject(`HTTP ${r.status} for ${url}`))
+    )
+  )
+  return results.flatMap(parseDriverPredRows)
 }
 
 // ── Team pace deltas ─────────────────────────────────────────────────────────

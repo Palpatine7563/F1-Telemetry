@@ -1,0 +1,23 @@
+prediction_target_race,prediction_target_event,predicted_position,driver,driver_number,source_model_driver,temporary_driver_override,team,predicted_qualifying_time,predicted_qualifying_seconds,gap_to_predicted_pole_seconds,model_pole_time,model_pole_seconds,target_team_delta_pct_vs_mercedes,driver_offset_to_team_best_seconds,driver_qualifying_samples_used
+Dutch GP / Zandvoort,fastf1_2025_dutch_grand_prix,1,HAM,44,HAM,,Ferrari,1:10.949,70.949,0.000,1:10.893,70.893,0.117,0.056,11
+Dutch GP / Zandvoort,fastf1_2025_dutch_grand_prix,2,LEC,16,LEC,,Ferrari,1:11.003,71.003,0.054,1:10.893,70.893,0.117,0.110,11
+Dutch GP / Zandvoort,fastf1_2025_dutch_grand_prix,3,ANT,12,ANT,,Mercedes,1:11.056,71.056,0.107,1:10.893,70.893,0.000,0.080,11
+Dutch GP / Zandvoort,fastf1_2025_dutch_grand_prix,4,VER,3,VER,,Red Bull Racing,1:11.179,71.179,0.230,1:10.893,70.893,-0.238,0.033,10
+Dutch GP / Zandvoort,fastf1_2025_dutch_grand_prix,5,RUS,63,RUS,,Mercedes,1:11.231,71.231,0.282,1:10.893,70.893,0.000,0.255,11
+Dutch GP / Zandvoort,fastf1_2025_dutch_grand_prix,6,LAW,30,HAD,HAD->LAW,Red Bull Racing,1:11.419,71.419,0.470,1:10.893,70.893,-0.238,0.274,10
+Dutch GP / Zandvoort,fastf1_2025_dutch_grand_prix,7,NOR,1,NOR,,McLaren,1:11.462,71.462,0.513,1:10.893,70.893,-0.645,0.029,11
+Dutch GP / Zandvoort,fastf1_2025_dutch_grand_prix,8,PIA,81,PIA,,McLaren,1:11.590,71.590,0.641,1:10.893,70.893,-0.645,0.157,11
+Dutch GP / Zandvoort,fastf1_2025_dutch_grand_prix,9,GAS,10,GAS,,Alpine,1:12.182,72.182,1.233,1:10.893,70.893,-1.633,0.047,11
+Dutch GP / Zandvoort,fastf1_2025_dutch_grand_prix,10,SAI,55,SAI,,Williams,1:12.471,72.471,1.522,1:10.893,70.893,-2.104,0.003,10
+Dutch GP / Zandvoort,fastf1_2025_dutch_grand_prix,11,COL,43,COL,,Alpine,1:12.564,72.564,1.615,1:10.893,70.893,-1.633,0.430,11
+Dutch GP / Zandvoort,fastf1_2025_dutch_grand_prix,12,HUL,27,HUL,,Audi,1:12.605,72.605,1.656,1:10.893,70.893,-1.980,0.225,11
+Dutch GP / Zandvoort,fastf1_2025_dutch_grand_prix,13,BEA,87,BEA,,Haas F1 Team,1:12.625,72.625,1.676,1:10.893,70.893,-2.146,0.127,11
+Dutch GP / Zandvoort,fastf1_2025_dutch_grand_prix,14,LIN,41,LIN,,Racing Bulls,1:12.693,72.693,1.744,1:10.893,70.893,-2.211,0.149,11
+Dutch GP / Zandvoort,fastf1_2025_dutch_grand_prix,15,ALB,23,ALB,,Williams,1:12.701,72.701,1.752,1:10.893,70.893,-2.104,0.233,11
+Dutch GP / Zandvoort,fastf1_2025_dutch_grand_prix,16,BOR,5,BOR,,Audi,1:12.828,72.828,1.879,1:10.893,70.893,-1.980,0.448,11
+Dutch GP / Zandvoort,fastf1_2025_dutch_grand_prix,17,TSU,22,LAW,LAW->TSU,Racing Bulls,1:12.837,72.837,1.888,1:10.893,70.893,-2.211,0.293,11
+Dutch GP / Zandvoort,fastf1_2025_dutch_grand_prix,18,OCO,31,OCO,,Haas F1 Team,1:12.857,72.857,1.908,1:10.893,70.893,-2.146,0.359,11
+Dutch GP / Zandvoort,fastf1_2025_dutch_grand_prix,19,BOT,77,BOT,,Cadillac,1:14.176,74.176,3.227,1:10.893,70.893,-4.286,0.161,11
+Dutch GP / Zandvoort,fastf1_2025_dutch_grand_prix,20,PER,11,PER,,Cadillac,1:14.206,74.206,3.257,1:10.893,70.893,-4.286,0.191,11
+Dutch GP / Zandvoort,fastf1_2025_dutch_grand_prix,21,ALO,14,ALO,,Aston Martin,1:14.558,74.558,3.609,1:10.893,70.893,-5.013,0.028,11
+Dutch GP / Zandvoort,fastf1_2025_dutch_grand_prix,22,STR,18,STR,,Aston Martin,1:14.937,74.937,3.988,1:10.893,70.893,-5.013,0.406,10

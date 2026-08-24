@@ -264,7 +264,11 @@ export default function TrackMap({
     for (let i = navCalls.length - 1; i >= 0; i--) {
       if (navCalls[i].progress < cutoff) { targetIdx = i; break }
     }
-    if (targetIdx >= 0) onProgressChange(Math.max(0, navCalls[targetIdx].progress - leadIn))
+    if (targetIdx >= 0) {
+      const p = Math.max(0, navCalls[targetIdx].progress - leadIn)
+      progressRef.current = p
+      onProgressChange(p)
+    }
   }, [navCalls, progress, refLapDuration, onProgressChange])
 
   const goToNextRadio = useCallback(() => {
@@ -275,7 +279,11 @@ export default function TrackMap({
     for (let i = 0; i < navCalls.length; i++) {
       if (navCalls[i].progress > progress + 0.001) { targetIdx = i; break }
     }
-    if (targetIdx >= 0) onProgressChange(Math.max(0, navCalls[targetIdx].progress - leadIn))
+    if (targetIdx >= 0) {
+      const p = Math.max(0, navCalls[targetIdx].progress - leadIn)
+      progressRef.current = p
+      onProgressChange(p)
+    }
   }, [navCalls, progress, refLapDuration, onProgressChange])
 
   const handleScreenshot = useCallback(async () => {

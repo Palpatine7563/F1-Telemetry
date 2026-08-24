@@ -434,6 +434,9 @@ export default function TrackMap({
         } else if (msg.flag === 'CLEAR' && msg.scope === 'Sector' && msg.sector) {
           yellowSectors.delete(msg.sector)
         }
+      } else if (msg.category === 'Other' && msg.msg?.includes('RED FLAG')) {
+        trackState = 'red'
+        yellowSectors.clear()
       }
     }
     return { trackState, yellowSectors }

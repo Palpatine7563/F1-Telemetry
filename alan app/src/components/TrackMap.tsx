@@ -52,9 +52,23 @@ function buildTransform(pts: { x: number; y: number }[]): Transform {
   }
 }
 
-function pointsToPath(pts: { x: number; y: number }[]): string {
-  if (pts.length === 0) return ''
-  return 'M ' + pts.map((p) => `${p.x.toFixed(1)},${p.y.toFixed(1)}`).join(' L ') + ' Z'
+function catmullRomPath(pts: { x: number; y: number }[], closed = false): string {
+  if (pts.length < 2) return ''
+  const n = pts.length
+  const ps: { x: number; y: number }[] = closed
+    ? [pts[n - 1], ...pts, pts[0], pts[1]]
+    : [{ x: 2 * pts[0].x - pts[1].x, y: 2 * pts[0].y - pts[1].y },
+       ...pts,
+       { x: 2 * pts[n - 1].x - pts[n - 2].x, y: 2 * pts[n - 1].y - pts[n - 2].y }]
+  let d = `M ${pts[0].x.toFixed(1)},${pts[0].y.toFixed(1)}`
+  for (let i = 1; i < ps.length - 2; i++) {
+    const [p0, p1, p2, p3] = [ps[i - 1], ps[i], ps[i + 1], ps[i + 2]]
+    d += ` C ${(p1.x + (p2.x - p0.x) / 6).toFixed(1)},${(p1.y + (p2.y - p0.y) / 6).toFixed(1)}`
+       + ` ${(p2.x - (p3.x - p1.x) / 6).toFixed(1)},${(p2.y - (p3.y - p1.y) / 6).toFixed(1)}`
+       + ` ${p2.x.toFixed(1)},${p2.y.toFixed(1)}`
+  }
+  if (closed) d += ' Z'
+  return d
 }
 
 interface Props {
@@ -556,7 +570,7 @@ export default function TrackMap({
           onCameraDriverChange={setSatCamDriver}
         />
       ) : (
-        <svg width={SVG_W} height={SVG_H} viewBox={`0 0 ${SVG_W} ${SVG_H}`} className="track-svg">
+        <svg width={SVG_W} height={SVG_H} viewBox={`0 0 ${SVG_W} ${SVG_H}`} className="track-svg" shapeRendering="geometricPrecision">
 
           {/* Optional dropped background image */}
           {bgImageUrl && (
@@ -566,24 +580,18 @@ export default function TrackMap({
 
           {/* Pit lane (full race only) — drawn below the racing line */}
           {totalLaps > 0 && pitLaneSegments.length > 0 && pitLaneSegments.map((seg, i) => {
-            const pts = seg.map(p => {
-              const { x, y } = transform.apply(p)
-              return `${x.toFixed(1)},${y.toFixed(1)}`
-            }).join(' ')
+            const pts = seg.map(p => transform.apply(p))
             return (
-              <polyline key={`pit${i}`} points={pts} fill="none"
+              <path key={`pit${i}`} d={catmullRomPath(pts, false)} fill="none"
                 stroke="#ffffff" strokeWidth={6}
                 strokeOpacity={0.08}
                 strokeLinecap="round" strokeLinejoin="round" />
             )
           })}
           {totalLaps > 0 && pitLaneSegments.length > 0 && pitLaneSegments.map((seg, i) => {
-            const pts = seg.map(p => {
-              const { x, y } = transform.apply(p)
-              return `${x.toFixed(1)},${y.toFixed(1)}`
-            }).join(' ')
+            const pts = seg.map(p => transform.apply(p))
             return (
-              <polyline key={`pitl${i}`} points={pts} fill="none"
+              <path key={`pitl${i}`} d={catmullRomPath(pts, false)} fill="none"
                 stroke="#aaccff" strokeWidth={1.5}
                 strokeOpacity={0.35}
                 strokeLinecap="round" strokeLinejoin="round"
@@ -594,21 +602,15 @@ export default function TrackMap({
           {/* Track with race-condition coloring (white default → yellow/red under caution) */}
           {hasData && trackData && (() => {
             const shadow = trackData.segments.map((run, i) => {
-              const pts = run.points.map(p => {
-                const { x, y } = transform.apply(p)
-                return `${x.toFixed(1)},${y.toFixed(1)}`
-              }).join(' ')
-              return <polyline key={`sh${i}`} points={pts} fill="none"
+              const pts = run.points.map(p => transform.apply(p))
+              return <path key={`sh${i}`} d={catmullRomPath(pts, false)} fill="none"
                 stroke="#00000080" strokeWidth={14}
                 strokeLinecap="round" strokeLinejoin="round" />
             })
             const colored = trackData.segments.map((run, i) => {
-              const pts = run.points.map(p => {
-                const { x, y } = transform.apply(p)
-                return `${x.toFixed(1)},${y.toFixed(1)}`
-              }).join(' ')
+              const pts = run.points.map(p => transform.apply(p))
               return (
-                <polyline key={`seg${i}`} points={pts} fill="none"
+                <path key={`seg${i}`} d={catmullRomPath(pts, false)} fill="none"
                   stroke={getSegmentColor(i)}
                   strokeWidth={4}
                   strokeLinecap="round" strokeLinejoin="round" />
@@ -623,12 +625,13 @@ export default function TrackMap({
             const fallbackColor = trackState === 'red' ? TRACK_COLOR_RED
               : (trackState === 'sc' || trackState === 'vsc') ? TRACK_COLOR_YELLOW
               : TRACK_COLOR_BASE
+            const d = catmullRomPath(transformedPoints, true)
             return (
               <>
-                <path d={pointsToPath(transformedPoints)} fill="none"
+                <path d={d} fill="none"
                   stroke="#00000080" strokeWidth={18}
                   strokeLinecap="round" strokeLinejoin="round" />
-                <path d={pointsToPath(transformedPoints)} fill="none"
+                <path d={d} fill="none"
                   stroke={fallbackColor} strokeWidth={4}
                   strokeLinecap="round" strokeLinejoin="round" />
               </>
@@ -833,14 +836,11 @@ export default function TrackMap({
           {showClip && Object.entries(clipZones).map(([driver, zones]) => {
             if (!activeDrivers.has(driver)) return null
             return zones.map((zone, zi) => {
-              const pts = zone.points.map(p => {
-                const { x, y } = transform.apply(p)
-                return `${x.toFixed(1)},${y.toFixed(1)}`
-              }).join(' ')
+              const pts = zone.points.map(p => transform.apply(p))
               return (
-                <polyline
+                <path
                   key={`clip-${driver}-${zi}`}
-                  points={pts}
+                  d={catmullRomPath(pts, false)}
                   fill="none"
                   stroke="#ff9800"
                   strokeWidth={6}

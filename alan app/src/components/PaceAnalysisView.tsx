@@ -137,6 +137,25 @@ const TRACK_COLOR: Record<string, string> = {
   'Straights':    '#8899aa',
 }
 
+function catmullRomPath(pts: { x: number; y: number }[], closed = false): string {
+  if (pts.length < 2) return ''
+  const n = pts.length
+  const ps: { x: number; y: number }[] = closed
+    ? [pts[n - 1], ...pts, pts[0], pts[1]]
+    : [{ x: 2 * pts[0].x - pts[1].x, y: 2 * pts[0].y - pts[1].y },
+       ...pts,
+       { x: 2 * pts[n - 1].x - pts[n - 2].x, y: 2 * pts[n - 1].y - pts[n - 2].y }]
+  let d = `M ${pts[0].x.toFixed(1)},${pts[0].y.toFixed(1)}`
+  for (let i = 1; i < ps.length - 2; i++) {
+    const [p0, p1, p2, p3] = [ps[i - 1], ps[i], ps[i + 1], ps[i + 2]]
+    d += ` C ${(p1.x + (p2.x - p0.x) / 6).toFixed(1)},${(p1.y + (p2.y - p0.y) / 6).toFixed(1)}`
+       + ` ${(p2.x - (p3.x - p1.x) / 6).toFixed(1)},${(p2.y - (p3.y - p1.y) / 6).toFixed(1)}`
+       + ` ${p2.x.toFixed(1)},${p2.y.toFixed(1)}`
+  }
+  if (closed) d += ' Z'
+  return d
+}
+
 const SVG_W = 800
 const SVG_H = 600
 const PAD   = 40
@@ -168,7 +187,7 @@ function TrackSVG({ trackData }: { trackData: TrackData }) {
   }, [trackData])
 
   return (
-    <svg viewBox={viewBox} className="pace-track-svg" style={{ width: '100%', maxHeight: 500 }}>
+    <svg viewBox={viewBox} className="pace-track-svg" style={{ width: '100%', maxHeight: 500 }} shapeRendering="geometricPrecision">
       {/* Render straights first so colored segments draw on top */}
       {(['Straights', 'Fast corners', 'Slow corners'] as const).flatMap(cat =>
         trackData.segments
@@ -178,12 +197,12 @@ function TrackSVG({ trackData }: { trackData: TrackData }) {
             const color = TRACK_COLOR[run.category] ?? '#667'
             const pts = run.points.map(p => {
               const { sx, sy } = transform(p.x, p.y)
-              return `${sx.toFixed(1)},${sy.toFixed(1)}`
-            }).join(' ')
+              return { x: sx, y: sy }
+            })
             return (
-              <polyline
+              <path
                 key={i}
-                points={pts}
+                d={catmullRomPath(pts, false)}
                 fill="none"
                 stroke={color}
                 strokeWidth={4}

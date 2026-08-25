@@ -36,7 +36,7 @@ function ColoredTrack({ trackData }: { trackData: TrackData }) {
   }, [trackData])
 
   return (
-    <svg viewBox={`0 0 ${SVG_W} ${SVG_H}`} className="static-track-svg" style={{ width: '100%', height: '100%' }}>
+    <svg viewBox={`0 0 ${SVG_W} ${SVG_H}`} className="static-track-svg" style={{ width: '100%', height: '100%' }} shapeRendering="geometricPrecision">
       {(['Straights', 'Fast corners', 'Slow corners'] as const).flatMap(cat =>
         trackData.segments
           .map((run, i) => ({ run, i }))
@@ -45,12 +45,12 @@ function ColoredTrack({ trackData }: { trackData: TrackData }) {
             const color = TRACK_COLOR[run.category] ?? '#667'
             const pts = run.points.map(p => {
               const { sx, sy } = transform(p.x, p.y)
-              return `${sx.toFixed(1)},${sy.toFixed(1)}`
-            }).join(' ')
+              return { x: sx, y: sy }
+            })
             return (
-              <polyline
+              <path
                 key={i}
-                points={pts}
+                d={catmullRomPath(pts, false)}
                 fill="none"
                 stroke={color}
                 strokeWidth={5}
@@ -69,6 +69,25 @@ function ColoredTrack({ trackData }: { trackData: TrackData }) {
 interface TrackPoint { x: number; y: number; r: number }
 interface TrackOutline { circuit: string; points: TrackPoint[]; error?: string }
 
+function catmullRomPath(pts: { x: number; y: number }[], closed = false): string {
+  if (pts.length < 2) return ''
+  const n = pts.length
+  const ps: { x: number; y: number }[] = closed
+    ? [pts[n - 1], ...pts, pts[0], pts[1]]
+    : [{ x: 2 * pts[0].x - pts[1].x, y: 2 * pts[0].y - pts[1].y },
+       ...pts,
+       { x: 2 * pts[n - 1].x - pts[n - 2].x, y: 2 * pts[n - 1].y - pts[n - 2].y }]
+  let d = `M ${pts[0].x.toFixed(1)},${pts[0].y.toFixed(1)}`
+  for (let i = 1; i < ps.length - 2; i++) {
+    const [p0, p1, p2, p3] = [ps[i - 1], ps[i], ps[i + 1], ps[i + 2]]
+    d += ` C ${(p1.x + (p2.x - p0.x) / 6).toFixed(1)},${(p1.y + (p2.y - p0.y) / 6).toFixed(1)}`
+       + ` ${(p2.x - (p3.x - p1.x) / 6).toFixed(1)},${(p2.y - (p3.y - p1.y) / 6).toFixed(1)}`
+       + ` ${p2.x.toFixed(1)},${p2.y.toFixed(1)}`
+  }
+  if (closed) d += ' Z'
+  return d
+}
+
 function buildPath(points: TrackPoint[]): string {
   if (points.length === 0) return ''
   const xs = points.map((p) => p.x)
@@ -80,18 +99,17 @@ function buildPath(points: TrackPoint[]): string {
   const scale = Math.min((SVG_W - PAD * 2) / trackW, (SVG_H - PAD * 2) / trackH)
   const ox = PAD + ((SVG_W - PAD * 2) - trackW * scale) / 2
   const oy = PAD + ((SVG_H - PAD * 2) - trackH * scale) / 2
-  const tx = (x: number) => ox + (x - minX) * scale
-  const ty = (y: number) => oy + (maxY - y) * scale
-  const d = points
-    .map((p, i) => `${i === 0 ? 'M' : 'L'} ${tx(p.x).toFixed(1)},${ty(p.y).toFixed(1)}`)
-    .join(' ')
-  return d + ' Z'
+  const mapped = points.map(p => ({
+    x: ox + (p.x - minX) * scale,
+    y: oy + (maxY - p.y) * scale,
+  }))
+  return catmullRomPath(mapped, true)
 }
 
 function OutlineTrack({ outline }: { outline: TrackOutline }) {
   const path = buildPath(outline.points)
   return (
-    <svg viewBox={`0 0 ${SVG_W} ${SVG_H}`} className="static-track-svg" style={{ width: '100%', height: '100%' }}>
+    <svg viewBox={`0 0 ${SVG_W} ${SVG_H}`} className="static-track-svg" style={{ width: '100%', height: '100%' }} shapeRendering="geometricPrecision">
       <path d={path} fill="none" stroke="#ffffff18" strokeWidth={18} strokeLinejoin="round" strokeLinecap="round" />
       <path d={path} fill="none" stroke="#e10600" strokeWidth={4} strokeLinejoin="round" strokeLinecap="round" />
       <path d={path} fill="none" stroke="#ff6b6b" strokeWidth={1.5} strokeLinejoin="round" strokeLinecap="round" strokeOpacity={0.6} />

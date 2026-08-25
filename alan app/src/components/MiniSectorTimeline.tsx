@@ -54,6 +54,7 @@ export default function MiniSectorTimeline({
 
   // null in All mode with nothing hovered — no auto-fallback to first driver
   const focusDriver = highlightedDriver
+  const effectiveColorMode = focusDriver ? colorMode : 'speed'
 
   const fastestPerSector = miniSectors.map(fastestInSector)
   const hasCategoryData = miniSectors[0]?.category != null
@@ -64,14 +65,16 @@ export default function MiniSectorTimeline({
         <span className="timeline-title">Mini Sectors</span>
         <div className="color-mode-toggle">
           <button
-            className={`pill small ${colorMode === 'speed' ? 'active' : ''}`}
+            className={`pill small ${effectiveColorMode === 'speed' ? 'active' : ''}`}
             onClick={() => onColorModeChange('speed')}
           >
             {hasCategoryData ? 'Track Type' : 'Speed'}
           </button>
           <button
-            className={`pill small ${colorMode === 'delta' ? 'active' : ''}`}
+            className={`pill small ${effectiveColorMode === 'delta' ? 'active' : ''}`}
             onClick={() => onColorModeChange('delta')}
+            disabled={!focusDriver}
+            title={!focusDriver ? 'Hover or solo a driver to see time deltas' : undefined}
           >
             Time Delta
           </button>
@@ -81,7 +84,7 @@ export default function MiniSectorTimeline({
       {/* Sector color bar */}
       <div className="sector-bar">
         {miniSectors.map((ms, i) => {
-          const color = colorMode === 'speed'
+          const color = effectiveColorMode === 'speed'
             ? (ms.category ? (CATEGORY_COLORS[ms.category] ?? '#667') : characteristicColor(ms.avgThrottleRef, ms.avgBrakeRef))
             : focusDriver && ms.driverStats[focusDriver]
             ? deltaToColor(ms.driverStats[focusDriver].deltaVsFastest, maxDelta)

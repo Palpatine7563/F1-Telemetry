@@ -125,13 +125,13 @@ export const DRIVER_HIGHLIGHTS: Record<string, DriverHighlight[]> = {
     { race: 'Japanese GP', year: 2023, note: 'Clinched his third consecutive title at Suzuka with six races still to go — the most dominant season in the turbo-hybrid era.' },
   ],
   ANT: [
-    { race: 'Chinese GP', year: 2025, note: 'Won his first Formula 1 Grand Prix in only his second race weekend, becoming one of the youngest winners in history.' },
+    { race: 'Chinese GP', year: 2026, note: 'Won his maiden Formula 1 Grand Prix at Shanghai in a dominant lights-to-flag drive — the breakthrough result that announced his arrival among the frontrunners.' },
     { race: 'Belgian GP', year: 2026, note: 'Strategic masterclass at Spa — flat tyre degradation allowed him to undercut the leading group and win convincingly.' },
   ],
   HAM: [
     { race: 'Brazilian GP', year: 2008, note: 'Clinched his first World Championship on the final corner of the final lap, overtaking Glock to secure the fifth place he needed.' },
     { race: 'Russian GP', year: 2021, note: 'Won his 100th Formula 1 Grand Prix at Sochi — a milestone no other driver has ever reached.' },
-    { race: 'Hungarian GP', year: 2020, note: 'Won from the back of the grid after a first-lap pit stop in changeable conditions — a masterclass in strategy and tyre management.' },
+    { race: 'Brazilian GP', year: 2021, note: 'Fought from the back of the grid to victory after a disqualification controversy — a stunning drive through the field that reignited his title battle with Verstappen.' },
   ],
   NOR: [
     { race: 'Miami GP', year: 2024, note: 'His long-awaited first win, finally ending the "Last Lap Lando" narrative after three years of heartbreak.' },
@@ -139,22 +139,22 @@ export const DRIVER_HIGHLIGHTS: Record<string, DriverHighlight[]> = {
     { race: 'Hungarian GP', year: 2026, note: 'McLaren\'s rear mechanical grip advantage was decisive — Norris was 8 km/h faster through Turn 2 than any rival.' },
   ],
   RUS: [
-    { race: 'Sakhir GP', year: 2020, note: 'Substituting for Hamilton, Russell led for most of the race before a pit stop error and puncture cost him a stunning debut victory.' },
+    { race: 'Sakhir GP', year: 2020, note: 'Substituting for Hamilton, Russell led for most of the race before a pit stop error and puncture cost him a stunning debut win for Mercedes.' },
     { race: 'Brazilian GP', year: 2022, note: 'Maiden Formula 1 victory at Interlagos — a composed, controlled drive that confirmed his place among the grid\'s elite.' },
   ],
   LEC: [
     { race: 'Bahrain GP', year: 2019, note: 'Won on his Ferrari debut, becoming the second youngest driver to win for the Scuderia — on the same track where he had taken his first pole.' },
-    { race: 'Italian GP', year: 2019, note: 'Back-to-back Ferrari home wins at Monza; the tifosi invaded the track in scenes of raw emotion rarely seen in modern F1.' },
+    { race: 'Italian GP', year: 2024, note: 'Won at Monza in front of the Tifosi — an emotional Ferrari home victory that ended a long wait and triggered scenes of celebration in the grandstands.' },
     { race: 'Monaco GP', year: 2024, note: 'Finally won his home race after years of Monaco heartbreak, including a devastating 2022 mechanical failure while leading.' },
   ],
   PIA: [
     { race: 'Hungarian GP', year: 2024, note: 'First career victory at the Hungaroring — a composed performance in a McLaren one-two that announced his arrival at the front.' },
-    { race: 'Italian GP', year: 2024, note: 'Back-to-back wins at Monza confirmed Piastri as a genuine championship contender and completed a remarkable McLaren double.' },
+    { race: 'Dutch GP', year: 2025, note: 'Claimed a grand chelem at Zandvoort — pole, win, fastest lap, and led every lap — a masterclass that underlined his status as a future champion.' },
   ],
   SAI: [
-    { race: 'British GP', year: 2022, note: 'Won from pole just days after emergency appendix surgery — widely considered one of the most remarkable Formula 1 victories of the modern era.' },
+    { race: 'British GP', year: 2022, note: 'Won from pole at Silverstone — a commanding drive under intense pressure that produced one of his strongest performances of the season.' },
     { race: 'Singapore GP', year: 2023, note: 'Brilliant lights-to-flag win at Marina Bay, holding off charging rivals on ageing tyres in intense heat and humidity.' },
-    { race: 'Las Vegas GP', year: 2024, note: 'Won under the neon Strip in dominant fashion — a perfect send-off from Ferrari before his move to Williams.' },
+    { race: 'Mexico City GP', year: 2024, note: 'Won at the Autodromo Hermanos Rodriguez in dominant fashion — a perfect send-off from Ferrari before his move to Williams.' },
   ],
   ALO: [
     { race: 'Bahrain GP', year: 2005, note: 'Won the race that confirmed his first World Championship — ending Michael Schumacher\'s five-title run at just 24 years old.' },
@@ -163,7 +163,7 @@ export const DRIVER_HIGHLIGHTS: Record<string, DriverHighlight[]> = {
   ],
   GAS: [
     { race: 'Italian GP', year: 2020, note: 'One of the biggest shock results in recent memory — Gasly won at Monza for AlphaTauri after a Hamilton pit lane penalty, the team\'s first ever F1 win.' },
-    { race: 'Azerbaijan GP', year: 2023, note: 'Podium finish at Baku with Alpine in a chaotic race — confirmation of his ability to capitalise on mixed conditions.' },
+    { race: 'Brazilian GP', year: 2019, note: 'Scored a stunning second place for Toro Rosso at Interlagos — just months after being dropped by Red Bull — one of the most emotional results in recent F1 history.' },
   ],
   OCO: [
     { race: 'Hungarian GP', year: 2021, note: 'First and only Formula 1 victory — Ocon kept his head in a chaotic race where most frontrunners were wiped out at Turn 1 on lap one.' },
@@ -182,16 +182,17 @@ export const DRIVER_HIGHLIGHTS: Record<string, DriverHighlight[]> = {
   ],
   HUL: [
     { race: '24 Hours of Le Mans', year: 2015, note: 'Won Le Mans outright with Porsche — his greatest motorsport achievement and a title that eluded him throughout his Formula 1 career.' },
-    { race: 'Brazilian GP', year: 2012, note: 'Consistently punched above his car\'s weight throughout his career, with multiple strong points finishes at Force India and Renault.' },
+    { race: 'Brazilian GP', year: 2010, note: 'Took a stunning pole position at Interlagos in the wet — out-qualifying everyone in a Williams that had no business being at the front — one of the great qualifying laps of the modern era.' },
+    { race: 'British GP', year: 2025, note: 'Claimed his first Formula 1 podium at Silverstone after more than 180 race starts — one of the most celebrated moments in the paddock from a driver whose talent long deserved it.' },
   ],
   ALB: [
-    { race: 'Bahrain GP', year: 2022, note: 'Scored Williams\' first championship points since 2019 — a significant moment in the team\'s long climb back to relevance.' },
+    { race: 'British GP', year: 2020, note: 'Claimed a podium finish at Silverstone in his second season at Red Bull — evidence of the raw pace that had earned him a top-team seat.' },
   ],
   BEA: [
-    { race: 'Monaco GP', year: 2024, note: 'Scored points on his Formula 1 debut as a Ferrari substitute — the composed performance that earned him his full-time 2025 seat at Haas.' },
+    { race: 'Saudi Arabian GP', year: 2024, note: 'Scored points on his Formula 1 debut at Jeddah, deputising for Sainz at Ferrari — the composed performance that earned him his full-time 2025 seat at Haas.' },
   ],
   COL: [
-    { race: 'Las Vegas GP', year: 2024, note: 'Scored points on his debut for Williams in Las Vegas — a performance that immediately attracted interest from top teams for 2026.' },
+    { race: 'Azerbaijan GP', year: 2024, note: 'Scored P8 at Baku early in his Formula 1 career — a composed drive on one of the fastest and most demanding street circuits that announced his arrival at the top level.' },
   ],
   BOR: [
     { race: 'Bahrain GP', year: 2026, note: 'Made his Formula 1 debut with Audi — representing the German manufacturer\'s first race as a fully works Formula 1 entry.' },
@@ -204,5 +205,9 @@ export const DRIVER_HIGHLIGHTS: Record<string, DriverHighlight[]> = {
   ],
   LIN: [
     { race: 'Bahrain GP', year: 2026, note: 'Made his Formula 1 debut with Racing Bulls as one of the youngest drivers on the 2026 grid, backed by the Red Bull junior programme.' },
+  ],
+  TSU: [
+    { race: 'Abu Dhabi GP', year: 2021, note: 'Finished fourth at Yas Marina in his debut season — a controlled performance on the final lap of the year that confirmed his status as one of the most exciting rookie talents in the field.' },
+    { race: 'Qatar GP', year: 2025, note: 'Fifth in the Sprint at Lusail — a clean, precise drive that demonstrated his ability to perform on circuits that demand absolute commitment.' },
   ],
 }

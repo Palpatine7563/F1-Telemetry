@@ -119,7 +119,7 @@ export default function ResultsPage({ initialRound }: Props) {
                   <div key={r.Driver.code} className={`res-row ${sc}`}>
                     <span className="rc-pos">
                       {sc === 'lapped'
-                        ? <span style={{ color: '#556' }}>L</span>
+                        ? <span style={{ color: '#556' }}>{r.status.replace(' Laps', 'L').replace(' Lap', 'L')}</span>
                         : icon ?? <span style={{ color: '#778' }}>{r.positionText === 'R' ? 'DNF' : r.positionText === 'W' ? 'DNS' : r.positionText}</span>}
                     </span>
                     <span className="rc-no" style={{ color }}>{r.Driver.permanentNumber}</span>

@@ -51,8 +51,15 @@ import './App.css'
 
 export default function App() {
   const [selectedSeason, setSelectedSeason] = useState<'historical' | number>(2026)
-  const [circuit, setCircuit] = useState<CircuitConfig>(CIRCUITS[0])
-  const [session, setSession] = useState<CircuitSession>(CIRCUITS[0].sessions[0])
+  const [circuit, setCircuit] = useState<CircuitConfig>(() => {
+    return CIRCUITS.filter(c => !c.year && c.hasData)
+      .sort((a, b) => b.raceDate.localeCompare(a.raceDate))[0] ?? CIRCUITS[0]
+  })
+  const [session, setSession] = useState<CircuitSession>(() => {
+    const c = CIRCUITS.filter(c => !c.year && c.hasData)
+      .sort((a, b) => b.raceDate.localeCompare(a.raceDate))[0] ?? CIRCUITS[0]
+    return c.sessions.find(s => s.type === 'full_race') ?? c.sessions[0]
+  })
   const [driverTelemetry, setDriverTelemetry] = useState<Record<string, TelemetryPoint[]>>({})
   const [dnfDrivers, setDnfDrivers] = useState<Set<string>>(new Set())
   const [loading, setLoading] = useState(false)
@@ -273,8 +280,9 @@ export default function App() {
     setLoading(true)
     const year = circuit.year ?? 2026
 
-    if (session.type === 'full_race') {
-      loadFullRaceTelemetry(fullRaceUrl(circuit.id, year)).then(({ data, dnf, totalLaps: tl, lapBoundaries: lb, safetyCars: sc, stints: st, pitStops: ps, overtakes: ov, standingRestartLaps: srl }) => {
+    if (session.type === 'full_race' || session.type === 'full_sprint_race') {
+      const folder = session.type === 'full_sprint_race' ? 'sprint_race' : 'race'
+      loadFullRaceTelemetry(fullRaceUrl(circuit.id, year, folder)).then(({ data, dnf, totalLaps: tl, lapBoundaries: lb, safetyCars: sc, stints: st, pitStops: ps, overtakes: ov, standingRestartLaps: srl }) => {
         setDriverTelemetry(data)
         setDnfDrivers(dnf)
         setLapBoundaries(lb)
@@ -288,9 +296,9 @@ export default function App() {
         setLoading(false)
       }).catch(() => setLoading(false))
       // Radio loads independently — prefers local cache, falls back to live OpenF1 API
-      fetchRaceRadio(year, circuit.raceDate, teamRadioUrl(circuit.id, year)).then(setRadioData).catch(() => {})
+      fetchRaceRadio(year, circuit.raceDate, teamRadioUrl(circuit.id, year, folder)).then(setRadioData).catch(() => {})
       // Race control messages
-      fetch(raceControlUrl(circuit.id, year))
+      fetch(raceControlUrl(circuit.id, year, folder))
         .then(r => r.ok ? r.json() : [])
         .then(setRaceControlMessages)
         .catch(() => {})
@@ -318,7 +326,7 @@ export default function App() {
       }
       setLoading(false)
     })
-  }, [circuit.id, session.type])
+  }, [circuit.id, circuit.year, session.type])
 
   const selectDriver = useCallback((driver: string) => {
     if (soloMode) {

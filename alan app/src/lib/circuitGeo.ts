@@ -72,6 +72,11 @@ export const CIRCUIT_GEO: Partial<Record<string, CircuitGeo>> = {
     xyOriginX:  -3562,   xyOriginY:  -1114,
     xyPerMetre: 10,      rotationRad: 0,
   },
+  dutch: {
+    centerLat:  52.3888, centerLon:  4.5409,
+    xyOriginX:  3847,    xyOriginY:  2548,
+    xyPerMetre: 10,      rotationRad: 0,
+  },
 }
 
 // Convert a FastF1 (X, Y) position to WGS-84 (lat, lon).

@@ -38,7 +38,7 @@ export interface ProcessedMiniSector {
   category?: string        // 'Slow corners' | 'Fast corners' | 'Straights' when loaded from track data
 }
 
-export type SessionType = 'qualifying' | 'race' | 'sprint_qualifying' | 'sprint_race' | 'full_race'
+export type SessionType = 'qualifying' | 'race' | 'sprint_qualifying' | 'sprint_race' | 'full_race' | 'full_sprint_race'
 
 export interface CircuitSession {
   type: SessionType

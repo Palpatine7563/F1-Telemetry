@@ -370,8 +370,8 @@ const TRIVIA_BANK: TriviaQ[] = [
   {
     q: 'Which team set the record for the fastest officially-timed F1 pitstop?',
     options: ['McLaren', 'Mercedes', 'Red Bull Racing', 'Ferrari'],
-    answer: 'Red Bull Racing',
-    fact: 'Red Bull Racing set a 1.82-second pitstop at the 2023 Bahrain Grand Prix — the fastest ever recorded.',
+    answer: 'McLaren',
+    fact: 'McLaren set a 1.80-second pitstop at the 2023 British Grand Prix — the fastest ever officially recorded in Formula 1.',
   },
   {
     q: 'Which circuit is nicknamed "The Temple of Speed"?',
@@ -769,9 +769,11 @@ function Leaderboard() {
   const [period, setPeriod] = useState<LbPeriod>('today')
   const [rows, setRows]     = useState<ScoreRow[]>([])
   const [loading, setLoading] = useState(true)
+  const [lbError, setLbError] = useState<string | null>(null)
 
   useEffect(() => {
     setLoading(true)
+    setLbError(null)
     const run = async () => {
       const base = supabase
         .from('game_scores')
@@ -779,9 +781,10 @@ function Leaderboard() {
         .eq('game_type', game)
         .order('score', { ascending: false })
         .limit(10)
-      const { data } = period === 'today'
+      const { data, error } = period === 'today'
         ? await base.eq('date', getTodayStr())
         : await base
+      if (error) { setLbError(error.message); setLoading(false); return }
       setRows(data ?? [])
       setLoading(false)
     }
@@ -811,6 +814,8 @@ function Leaderboard() {
 
       {loading ? (
         <div className="lb-empty">Loading…</div>
+      ) : lbError ? (
+        <div className="lb-empty" style={{ color: '#f66' }}>Error: {lbError}</div>
       ) : rows.length === 0 ? (
         <div className="lb-empty">No scores yet — be the first!</div>
       ) : (

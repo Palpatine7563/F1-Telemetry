@@ -10,7 +10,8 @@ const R  = 'race'              as SessionType
 const SQ = 'sprint_qualifying' as SessionType
 const SR = 'sprint_race'       as SessionType
 
-const FR = 'full_race' as SessionType
+const FR  = 'full_race'         as SessionType
+const FSR = 'full_sprint_race'  as SessionType
 
 const SESSION_LABELS: Record<SessionType, string> = {
   qualifying:        'Fastest Lap (Qualifying)',
@@ -18,9 +19,11 @@ const SESSION_LABELS: Record<SessionType, string> = {
   sprint_qualifying: 'Fastest Lap (Sprint Qualifying)',
   sprint_race:       'Fastest Lap (Sprint Race)',
   full_race:         'Full Race',
+  full_sprint_race:  'Full Sprint Race',
 }
 
-const FR_SESSION  = { type: FR, label: SESSION_LABELS[FR], drivers: [] }
+const FR_SESSION  = { type: FR,  label: SESSION_LABELS[FR],  drivers: [] }
+const FSR_SESSION = { type: FSR, label: SESSION_LABELS[FSR], drivers: [] }
 
 const stdSessions = [
   { type: Q,  label: SESSION_LABELS[Q],  drivers: FULL_GRID },
@@ -43,6 +46,7 @@ const sprintSessions = [
 const sprintSessionsFull = [
   { type: SQ, label: SESSION_LABELS[SQ], drivers: FULL_GRID },
   { type: SR, label: SESSION_LABELS[SR], drivers: FULL_GRID },
+  FSR_SESSION,
   { type: Q,  label: SESSION_LABELS[Q],  drivers: FULL_GRID },
   { type: R,  label: SESSION_LABELS[R],  drivers: FULL_GRID },
   FR_SESSION,

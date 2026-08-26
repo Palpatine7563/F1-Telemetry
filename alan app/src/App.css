@@ -5,6 +5,8 @@
   /* Red Flag (default) */
   --accent:        #e10600;
   --accent-2:      #e10600;
+  --accent-3:      #e10600;
+  --accent-4:      #e10600;
   --accent-dark:   #c00400;
   --accent-dim:    rgba(225, 6, 0, 0.12);
 
@@ -83,7 +85,13 @@
   position: absolute;
   bottom: 0; left: 0; right: 0;
   height: 2px;
-  background: linear-gradient(90deg, var(--accent) 0%, var(--accent-2, var(--accent)) 100%);
+  background: linear-gradient(
+    90deg,
+    var(--accent)   0%   25%,
+    var(--accent-2, var(--accent)) 25%  50%,
+    var(--accent-3, var(--accent-2, var(--accent))) 50%  75%,
+    var(--accent-4, var(--accent-3, var(--accent-2, var(--accent)))) 75% 100%
+  );
 }
 
 .logo { display: flex; align-items: baseline; gap: 8px; }

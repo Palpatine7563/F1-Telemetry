@@ -47,6 +47,7 @@ import SocialsPage from './components/SocialsPage'
 import BattleTracker from './components/BattleTracker'
 import HistoricalRacesPage from './components/HistoricalRacesPage'
 import PositionChart from './components/PositionChart'
+import Settings, { getStoredTheme, applyTheme } from './components/Settings'
 import './App.css'
 
 export default function App() {
@@ -69,6 +70,7 @@ export default function App() {
   const [colorMode, setColorMode] = useState<ColorMode>('speed')
   const [progress, setProgress] = useState(0)
   const [playing, setPlaying] = useState(false)
+  const [settingsOpen, setSettingsOpen] = useState(false)
   const VALID_VIEWS: AppView[] = ['telemetry', 'standings', 'calendar', 'results', 'drivers', 'teams', 'circuits', 'pace', 'pace2', 'insights', 'games', 'historicalraces', 'socials', 'privacy', 'about', 'disclaimer', 'changelog']
   const hashToView = (hash: string): AppView => {
     const v = hash.replace(/^#\/?/, '') as AppView
@@ -104,6 +106,11 @@ export default function App() {
 
   // Inject AdSense after content renders so Auto Ads never sees a blank page.
   // Pro users skip injection entirely; if they upgrade mid-session the script is removed.
+  useEffect(() => {
+    const { theme, liveryTeam } = getStoredTheme()
+    applyTheme(theme, liveryTeam)
+  }, [])
+
   useEffect(() => {
     if (profile?.tier === 'pro') return
     const t = setTimeout(() => {
@@ -738,6 +745,14 @@ export default function App() {
             Sign in
           </button>
         )}
+        <div style={{ position: 'relative' }}>
+          <button
+            className={`settings-trigger ${settingsOpen ? 'active' : ''}`}
+            onClick={() => setSettingsOpen(v => !v)}
+            title="Appearance settings"
+          >⚙</button>
+          {settingsOpen && <Settings onClose={() => setSettingsOpen(false)} />}
+        </div>
         <a href="https://www.buymeacoffee.com/PrivateTiles" target="_blank" rel="noopener noreferrer" className="bmc-btn">
           <img src="https://img.buymeacoffee.com/button-api/?text=Buy me a coffee&emoji=&slug=PrivateTiles&button_colour=FFDD00&font_colour=000000&font_family=Cookie&outline_colour=000000&coffee_colour=ffffff" alt="Buy me a coffee" />
         </a>

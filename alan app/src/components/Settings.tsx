@@ -2,18 +2,18 @@ import { useEffect, useRef, useState } from 'react'
 
 export type Theme = 'default' | 'pitwall' | 'carbon' | 'livery'
 
-const TEAM_LIVERIES: Array<{ name: string; color: string; bg: string }> = [
-  { name: 'McLaren',         color: '#ff8000', bg: '#1a0d00' },
-  { name: 'Ferrari',         color: '#e8002d', bg: '#1a0005' },
-  { name: 'Mercedes',        color: '#00d2be', bg: '#001a18' },
-  { name: 'Red Bull Racing', color: '#3671c6', bg: '#030e1e' },
-  { name: 'Aston Martin',    color: '#358c75', bg: '#021410' },
-  { name: 'Alpine',          color: '#0093cc', bg: '#00111a' },
-  { name: 'Williams',        color: '#64c4ff', bg: '#04111a' },
-  { name: 'Racing Bulls',    color: '#6692ff', bg: '#05091a' },
-  { name: 'Haas F1 Team',    color: '#b6babd', bg: '#131517' },
-  { name: 'Audi',            color: '#bb0000', bg: '#180000' },
-  { name: 'Cadillac',        color: '#c0c8ff', bg: '#0a0b1a' },
+const TEAM_LIVERIES: Array<{ name: string; color: string; color2?: string; bg: string }> = [
+  { name: 'McLaren',         color: '#ff8000', color2: '#000000', bg: '#120800' },
+  { name: 'Ferrari',         color: '#e8002d', color2: '#ffed00', bg: '#150003' },
+  { name: 'Mercedes',        color: '#00d2be', color2: '#c0c0c0', bg: '#001a18' },
+  { name: 'Red Bull Racing', color: '#3671c6', color2: '#fcc900', bg: '#03091a' },
+  { name: 'Aston Martin',    color: '#358c75', color2: '#a9c23f', bg: '#021410' },
+  { name: 'Alpine',          color: '#0093cc', color2: '#ff87bc', bg: '#00101a' },
+  { name: 'Williams',        color: '#005aff', color2: '#e8e8e8', bg: '#04081a' },
+  { name: 'Racing Bulls',    color: '#6692ff', color2: '#cc1e1e', bg: '#05091a' },
+  { name: 'Haas F1 Team',    color: '#b6babd', color2: '#e8002d', bg: '#131517' },
+  { name: 'Audi',            color: '#bb0000', color2: '#c0c0c0', bg: '#160000' },
+  { name: 'Cadillac',        color: '#c0c8ff', color2: '#0033ff', bg: '#090a1a' },
 ]
 
 const PRESETS = [
@@ -41,14 +41,16 @@ export function applyTheme(theme: Theme, liveryTeam: string | null) {
     const team = TEAM_LIVERIES.find(t => t.name === liveryTeam)
     if (team) {
       root.setAttribute('data-theme', 'default')
-      root.style.setProperty('--accent', team.color)
+      root.style.setProperty('--accent',   team.color)
+      root.style.setProperty('--accent-2', team.color2 ?? team.color)
       root.style.setProperty('--accent-dark', team.color + 'cc')
-      root.style.setProperty('--accent-dim', team.color + '18')
+      root.style.setProperty('--accent-dim',  team.color + '18')
       root.style.setProperty('--bg-base', team.bg)
       return
     }
   }
   root.removeAttribute('style')
+  root.style.setProperty('--accent-2', 'var(--accent)')
   if (theme === 'default') {
     root.removeAttribute('data-theme')
   } else {
@@ -117,18 +119,23 @@ export default function Settings({ onClose }: Props) {
 
       <div className="settings-section-label" style={{ marginTop: 16 }}>Team Livery</div>
       <div className="settings-liveries">
-        {TEAM_LIVERIES.map(t => (
-          <button
-            key={t.name}
-            className={`settings-livery-btn ${theme === 'livery' && liveryTeam === t.name ? 'active' : ''}`}
-            onClick={() => selectLivery(t.name)}
-            title={t.name}
-            style={{ '--team-color': t.color } as React.CSSProperties}
-          >
-            <span className="settings-livery-dot" style={{ background: t.color }} />
-            <span className="settings-livery-name">{t.name.replace(' F1 Team', '').replace(' Racing', '')}</span>
-          </button>
-        ))}
+        {TEAM_LIVERIES.map(t => {
+          const swatchStyle = t.color2
+            ? { background: `linear-gradient(135deg, ${t.color} 50%, ${t.color2} 50%)` }
+            : { background: t.color }
+          return (
+            <button
+              key={t.name}
+              className={`settings-livery-btn ${theme === 'livery' && liveryTeam === t.name ? 'active' : ''}`}
+              onClick={() => selectLivery(t.name)}
+              title={t.name}
+              style={{ '--team-color': t.color } as React.CSSProperties}
+            >
+              <span className="settings-livery-dot" style={swatchStyle} />
+              <span className="settings-livery-name">{t.name.replace(' F1 Team', '').replace(' Racing', '')}</span>
+            </button>
+          )
+        })}
       </div>
     </div>
   )

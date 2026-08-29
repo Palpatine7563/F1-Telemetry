@@ -256,12 +256,15 @@ export default function SatelliteView({
   const [svgW,        setSvgW]        = useState(900)
   const [svgH,        setSvgH]        = useState(530)
 
-  const mapDivRef       = useRef<HTMLDivElement>(null)
-  const mapRef          = useRef<L.Map | null>(null)
-  const bodyRef         = useRef<HTMLDivElement>(null)
-  const ignoringMoveRef = useRef(false)
+  const mapDivRef        = useRef<HTMLDivElement>(null)
+  const mapRef           = useRef<L.Map | null>(null)
+  const bodyRef          = useRef<HTMLDivElement>(null)
+  const cameraDriverRef  = useRef(cameraDriver)
 
   const geo = CIRCUIT_GEO[circuitId]
+
+  // Keep ref in sync so the Leaflet event handler can read it without stale closure
+  useEffect(() => { cameraDriverRef.current = cameraDriver }, [cameraDriver])
 
   // ── Track actual container size ────────────────────────────────────────────
   useEffect(() => {
@@ -303,9 +306,11 @@ export default function SatelliteView({
       .addAttribution('© <a href="https://www.esri.com" target="_blank" rel="noreferrer">Esri</a>')
       .addTo(map)
 
-    // Bump viewTick on user-initiated viewport changes (not programmatic follow-cam moves)
+    // Only bump viewTick on user-initiated map interactions.
+    // In follow-cam mode, progress-driven renders already update the SVG every frame —
+    // responding to programmatic setView events here would cause double-renders and track jitter.
     map.on('move zoom moveend zoomend', () => {
-      if (!ignoringMoveRef.current) setViewTick(v => v + 1)
+      if (!cameraDriverRef.current) setViewTick(v => v + 1)
     })
 
     mapRef.current = map
@@ -350,9 +355,7 @@ export default function SatelliteView({
     const { lat, lon } = xyToLatLon(p.x, p.y, geo)
     const metersPerPx = (followHalfM * 2) / Math.max(svgW, 1)
     const z = Math.log2(156543.03392 * Math.cos(geo.centerLat * Math.PI / 180) / metersPerPx)
-    ignoringMoveRef.current = true
     map.setView([lat, lon], Math.max(1, Math.min(20, z)), { animate: false })
-    ignoringMoveRef.current = false
   })
 
   // ── Car positions ──────────────────────────────────────────────────────────

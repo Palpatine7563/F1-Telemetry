@@ -425,17 +425,18 @@ export default function App() {
       }
       pairs.push([driver, tel[lo].relDist])
     }
-    // Hysteresis: within 1s gap, keep previous order to prevent criss-crossing
-    const threshold = 1.0 / refLapDuration
+    // Hysteresis: only when both drivers have an established prior rank AND are within
+    // 0.3s of each other — prevents criss-crossing without locking in wrong initial order.
+    const threshold = 0.3 / refLapDuration
     const prevRank = prevRaceOrderRef.current
     pairs.sort((a, b) => {
       const rdDiff = b[1] - a[1]
-      if (Math.abs(rdDiff) < threshold) {
-        const pa = prevRank[a[0]] ?? 999
-        const pb = prevRank[b[0]] ?? 999
-        if (pa !== pb) return pa - pb
+      const pa = prevRank[a[0]]
+      const pb = prevRank[b[0]]
+      if (Math.abs(rdDiff) < threshold && pa !== undefined && pb !== undefined && pa !== pb) {
+        return pa - pb
       }
-      return rdDiff > 0 ? 1 : -1
+      return rdDiff > 0 ? 1 : rdDiff < 0 ? -1 : 0
     })
     const positions: Record<string, number> = {}
     const relDists: Record<string, number> = {}

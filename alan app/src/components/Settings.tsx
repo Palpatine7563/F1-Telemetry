@@ -53,13 +53,14 @@ export function applyTheme(theme: Theme, liveryTeam: string | null) {
     if (team) {
       const [c1, c2 = c1, c3 = c2, c4 = c3] = team.colors
       root.setAttribute('data-theme', 'default')
-      root.style.setProperty('--accent',      c1)
-      root.style.setProperty('--accent-2',    c2)
-      root.style.setProperty('--accent-3',    c3)
-      root.style.setProperty('--accent-4',    c4)
-      root.style.setProperty('--accent-dark', c1 + 'cc')
-      root.style.setProperty('--accent-dim',  c1 + '18')
-      root.style.setProperty('--bg-base', team.bg)
+      root.style.setProperty('--accent',        c1)
+      root.style.setProperty('--accent-2',      c2)
+      root.style.setProperty('--accent-3',      c3)
+      root.style.setProperty('--accent-4',      c4)
+      root.style.setProperty('--accent-dark',   c1 + 'cc')
+      root.style.setProperty('--accent-dim',    c1 + '18')
+      root.style.setProperty('--bg-base',       team.bg)
+      root.style.setProperty('--wash-opacity',  '0.13')
       return
     }
   }

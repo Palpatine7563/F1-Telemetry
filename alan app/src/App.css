@@ -15,6 +15,9 @@
   --bg-surface:    #111820;
   --bg-raised:     #1e2a3a;
   --border:        #2a3a4a;
+
+  /* Team livery wash — 0 until a livery is selected */
+  --wash-opacity:  0;
 }
 
 /* Pit Wall — monochrome chrome, team colors are the only hue */
@@ -511,10 +514,27 @@
   overflow: hidden;
 }
 
+.track-map-container::before,
+.static-track-svg-wrap::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background:
+    radial-gradient(ellipse 75% 75% at 38% 42%, var(--accent)   0%, transparent 65%),
+    radial-gradient(ellipse 60% 60% at 68% 58%, var(--accent-2) 0%, transparent 65%),
+    radial-gradient(ellipse 50% 50% at 22% 70%, var(--accent-3) 0%, transparent 65%);
+  opacity: var(--wash-opacity);
+  pointer-events: none;
+  z-index: 0;
+  transition: opacity 0.5s ease;
+}
+
 .track-svg {
   flex: 1;
   width: 100%;
   height: 100%;
+  position: relative;
+  z-index: 1;
 }
 
 /* ── Track legend ── */
@@ -2449,6 +2469,8 @@
 
 .static-track-svg {
   max-height: 100%;
+  position: relative;
+  z-index: 1;
 }
 
 .static-track-loading {

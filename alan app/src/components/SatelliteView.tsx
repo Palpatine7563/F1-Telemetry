@@ -211,15 +211,18 @@ function CarLabel({ driver, color, speed, focused, carScale, lateral }: {
         </>
       )}
       <g transform={`translate(0,${chipY})`}>
-        <rect x={-17} y={-10} width={34} height={19} rx={5} fill="rgba(0,0,0,0.55)" transform="translate(2,2)" />
-        <rect x={-17} y={-10} width={34} height={19} rx={5} fill={color} />
-        <rect x={-17} y={-10} width={34} height={19} rx={5} fill="rgba(0,0,0,0.22)" />
+        {/* hard shadow for separation from other chips */}
+        <rect x={-18} y={-11} width={36} height={21} rx={6} fill="rgba(0,0,0,0.85)" transform="translate(2.5,2.5)" />
+        <rect x={-18} y={-11} width={36} height={21} rx={6} fill={color} />
+        {/* white border so chips don't bleed into each other */}
+        <rect x={-18} y={-11} width={36} height={21} rx={6} fill="none" stroke="white" strokeWidth={1.8} opacity={0.9} />
         <text textAnchor="middle" y={6} fill="white" fontSize={11} fontFamily="monospace" fontWeight="900">#{num}</text>
       </g>
       <g transform={`translate(0,${speedY})`}>
-        <rect x={-24} y={-9} width={48} height={16} rx={3} fill="rgba(5,12,24,0.82)" stroke="rgba(255,255,255,0.06)" strokeWidth={0.5} />
+        <rect x={-25} y={-10} width={50} height={18} rx={3} fill="rgba(0,0,0,0.80)" transform="translate(1.5,1.5)" />
+        <rect x={-25} y={-10} width={50} height={18} rx={3} fill="rgba(5,12,24,0.92)" stroke="rgba(255,255,255,0.35)" strokeWidth={1} />
         <text textAnchor="middle" y={5} fill={color} fontSize={9.5} fontFamily="monospace" fontWeight="700">
-          {Math.round(speed)}<tspan fontSize={6.5} fill="#5a7090"> km/h</tspan>
+          {Math.round(speed)}<tspan fontSize={6.5} fill="#8aaccc"> km/h</tspan>
         </text>
       </g>
       <g transform={`translate(0,${barY})`}>
@@ -253,9 +256,10 @@ export default function SatelliteView({
   const [svgW,        setSvgW]        = useState(900)
   const [svgH,        setSvgH]        = useState(530)
 
-  const mapDivRef = useRef<HTMLDivElement>(null)
-  const mapRef    = useRef<L.Map | null>(null)
-  const bodyRef   = useRef<HTMLDivElement>(null)
+  const mapDivRef       = useRef<HTMLDivElement>(null)
+  const mapRef          = useRef<L.Map | null>(null)
+  const bodyRef         = useRef<HTMLDivElement>(null)
+  const ignoringMoveRef = useRef(false)
 
   const geo = CIRCUIT_GEO[circuitId]
 
@@ -299,8 +303,10 @@ export default function SatelliteView({
       .addAttribution('© <a href="https://www.esri.com" target="_blank" rel="noreferrer">Esri</a>')
       .addTo(map)
 
-    // Bump viewTick on any viewport change so SVG positions re-compute
-    map.on('move zoom moveend zoomend', () => setViewTick(v => v + 1))
+    // Bump viewTick on user-initiated viewport changes (not programmatic follow-cam moves)
+    map.on('move zoom moveend zoomend', () => {
+      if (!ignoringMoveRef.current) setViewTick(v => v + 1)
+    })
 
     mapRef.current = map
     setViewTick(v => v + 1)
@@ -328,6 +334,8 @@ export default function SatelliteView({
 
   // ── Follow-cam: update Leaflet viewport each frame ─────────────────────────
   // Run on every render (progress changes) — intentionally not in dependency array.
+  // ignoringMoveRef prevents the setView call from triggering setViewTick,
+  // which would cause a second render per frame.
   // eslint-disable-next-line react-hooks/exhaustive-deps
   useEffect(() => {
     const map = mapRef.current
@@ -340,10 +348,11 @@ export default function SatelliteView({
     if (!p) return
 
     const { lat, lon } = xyToLatLon(p.x, p.y, geo)
-    // Convert followHalfM (metres half-span) to Leaflet zoom level
     const metersPerPx = (followHalfM * 2) / Math.max(svgW, 1)
     const z = Math.log2(156543.03392 * Math.cos(geo.centerLat * Math.PI / 180) / metersPerPx)
+    ignoringMoveRef.current = true
     map.setView([lat, lon], Math.max(1, Math.min(20, z)), { animate: false })
+    ignoringMoveRef.current = false
   })
 
   // ── Car positions ──────────────────────────────────────────────────────────
@@ -357,6 +366,8 @@ export default function SatelliteView({
   }, [activeDrivers, driverTelemetry, progress])
 
   // ── Track path SVG string ──────────────────────────────────────────────────
+  // Depends on progress so it re-projects every frame in follow-cam mode
+  // (viewTick doesn't increment during programmatic setView)
   const trackPath = useMemo(() => {
     if (!trackPoints.length || !mapRef.current || !geo) return ''
     const pts = [...trackPoints, trackPoints[0]]
@@ -365,7 +376,7 @@ export default function SatelliteView({
       return `${sx.toFixed(1)},${sy.toFixed(1)}`
     }).join(' L ')
   // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [trackPoints, geo, toScreen, viewTick])
+  }, [trackPoints, geo, toScreen, viewTick, progress])
 
   // ── Cars: screen coords + inputs ──────────────────────────────────────────
   const cars = useMemo(() => {

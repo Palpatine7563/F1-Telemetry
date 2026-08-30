@@ -50,21 +50,6 @@ function getPosByTime(tel: TelemetryPoint[], t: number): { x: number; y: number 
   return { x: p0.x + frac * (p1.x - p0.x), y: p0.y + frac * (p1.y - p0.y) }
 }
 
-// relDist-based position — still used by getHeading and interpolateInputs internally
-function getPos(tel: TelemetryPoint[], progress: number): { x: number; y: number } | null {
-  if (!tel?.length) return null
-  if (progress <= tel[0].relDist) return { x: tel[0].x, y: tel[0].y }
-  const last = tel[tel.length - 1]
-  if (progress >= last.relDist) return { x: last.x, y: last.y }
-  let lo = 0, hi = tel.length - 1
-  while (lo < hi - 1) {
-    const m = (lo + hi) >> 1
-    if (tel[m].relDist < progress) lo = m; else hi = m
-  }
-  const p0 = tel[lo], p1 = tel[hi]
-  const t = (progress - p0.relDist) / Math.max(p1.relDist - p0.relDist, 1e-9)
-  return { x: p0.x + t * (p1.x - p0.x), y: p0.y + t * (p1.y - p0.y) }
-}
 
 function computeLateral(x: number, y: number, path: { x: number; y: number }[]): number {
   if (path.length < 2) return 0

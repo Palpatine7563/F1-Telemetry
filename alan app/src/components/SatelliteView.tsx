@@ -31,6 +31,26 @@ const NUM: Record<string, string> = {
 }
 
 // ── Telemetry helpers ─────────────────────────────────────────────────────────
+
+// Time-based position: finds where the car physically was at absolute race time `t`.
+// Full-race telemetry is sorted by relDist (monotone with time), qualifying by time —
+// both work because time is monotone in either ordering.
+function getPosByTime(tel: TelemetryPoint[], t: number): { x: number; y: number } | null {
+  if (!tel?.length) return null
+  if (t <= tel[0].time) return { x: tel[0].x, y: tel[0].y }
+  const last = tel[tel.length - 1]
+  if (t >= last.time) return { x: last.x, y: last.y }
+  let lo = 0, hi = tel.length - 1
+  while (lo < hi - 1) {
+    const m = (lo + hi) >> 1
+    if (tel[m].time < t) lo = m; else hi = m
+  }
+  const p0 = tel[lo], p1 = tel[hi]
+  const frac = (t - p0.time) / Math.max(p1.time - p0.time, 1e-9)
+  return { x: p0.x + frac * (p1.x - p0.x), y: p0.y + frac * (p1.y - p0.y) }
+}
+
+// relDist-based position — still used by getHeading and interpolateInputs internally
 function getPos(tel: TelemetryPoint[], progress: number): { x: number; y: number } | null {
   if (!tel?.length) return null
   if (progress <= tel[0].relDist) return { x: tel[0].x, y: tel[0].y }
@@ -266,6 +286,18 @@ export default function SatelliteView({
   // Keep ref in sync so the Leaflet event handler can read it without stale closure
   useEffect(() => { cameraDriverRef.current = cameraDriver }, [cameraDriver])
 
+  // Total time span of the loaded telemetry — lets us convert 0-1 progress to race time.
+  // Using the max last-point time across all drivers avoids depending on App-level state.
+  const totalDuration = useMemo(() => {
+    let max = 0
+    for (const tel of Object.values(driverTelemetry)) {
+      if (tel.length > 0) max = Math.max(max, tel[tel.length - 1].time)
+    }
+    return max > 0 ? max : 90
+  }, [driverTelemetry])
+
+  const raceTime = progress * totalDuration
+
   // ── Track actual container size ────────────────────────────────────────────
   useEffect(() => {
     const el = bodyRef.current
@@ -349,7 +381,7 @@ export default function SatelliteView({
 
     const tel = driverTelemetry[cameraDriver]
     if (!tel) return
-    const p = getPos(tel, progress)
+    const p = getPosByTime(tel, raceTime)
     if (!p) return
 
     const { lat, lon } = xyToLatLon(p.x, p.y, geo)
@@ -359,14 +391,17 @@ export default function SatelliteView({
   })
 
   // ── Car positions ──────────────────────────────────────────────────────────
+  // Use time-based lookup so each car shows its actual physical location at this
+  // moment in the race — relDist-based lookup would put all cars at the same
+  // track fraction, making lapped cars appear at the leader's position.
   const carPositions = useMemo(() => {
     const out: Array<{ driver: string; x: number; y: number }> = []
     for (const driver of activeDrivers) {
-      const p = getPos(driverTelemetry[driver], progress)
+      const p = getPosByTime(driverTelemetry[driver], raceTime)
       if (p) out.push({ driver, x: p.x, y: p.y })
     }
     return out
-  }, [activeDrivers, driverTelemetry, progress])
+  }, [activeDrivers, driverTelemetry, raceTime])
 
   // ── Track path SVG string ──────────────────────────────────────────────────
   // Depends on progress so it re-projects every frame in follow-cam mode

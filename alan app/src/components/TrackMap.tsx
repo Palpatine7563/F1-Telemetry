@@ -464,6 +464,50 @@ export default function TrackMap({
     return { trackState, yellowSectors }
   }, [raceControlMessages, progress, refLapDuration])
 
+  // Recent notable race control messages for the event ticker overlay
+  const rcTicker = useMemo(() => {
+    if (!raceControlMessages || !totalLaps) return [] as { t: number; msg: string; kind: 'red' | 'yellow' | 'info'; age: number }[]
+    const t = progress * refLapDuration
+    const WINDOW = 90
+    type Item = { t: number; msg: string; kind: 'red' | 'yellow' | 'info'; age: number }
+    const items: Item[] = []
+    for (const m of raceControlMessages) {
+      if (m.t > t) break
+      const s = m.msg
+      let entry: { msg: string; kind: 'red' | 'yellow' | 'info' } | null = null
+      if (/RED FLAG|RACE SUSPENDED/.test(s)) {
+        entry = { msg: 'RED FLAG — RACE SUSPENDED', kind: 'red' }
+      } else if (/SAFETY CAR LIGHTS ON/.test(s)) {
+        entry = { msg: 'SAFETY CAR DEPLOYED', kind: 'yellow' }
+      } else if (/SAFETY CAR IN THIS LAP/.test(s)) {
+        entry = { msg: 'SAFETY CAR COMING IN', kind: 'yellow' }
+      } else if (/STANDING START/.test(s)) {
+        entry = { msg: 'STANDING START', kind: 'info' }
+      } else if (/EXTRA FORMATION LAP/.test(s)) {
+        entry = { msg: 'EXTRA FORMATION LAP', kind: 'info' }
+      } else if (/RACE WILL RESUME/.test(s)) {
+        const timeMatch = s.match(/AT (.+)$/)
+        entry = { msg: timeMatch ? `RACE RESUMES AT ${timeMatch[1]}` : 'RACE RESUMES', kind: 'info' }
+      } else if (/^OVERTAKE ENABLED/.test(s)) {
+        entry = { msg: 'OVERTAKE ENABLED', kind: 'info' }
+      } else if (m.flag === 'CHEQUERED') {
+        entry = { msg: 'CHEQUERED FLAG', kind: 'info' }
+      } else if (/FIA STEWARDS:.*DRIVE THROUGH PENALTY FOR CAR/.test(s)) {
+        const match = s.match(/CAR \d+ \((\w+)\)/)
+        const drv = match?.[1] ?? ''
+        entry = { msg: `DRIVE THROUGH PENALTY — ${drv}`, kind: 'red' }
+      } else if (/^(TURN \d+ )?INCIDENT INVOLVING CAR/.test(s) && /NOTED/.test(s)) {
+        const match = s.match(/CAR \d+ \((\w+)\)/)
+        const drv = match?.[1] ?? ''
+        const tMatch = s.match(/TURN (\d+)/)
+        const turn = tMatch ? ` T${tMatch[1]}` : ''
+        entry = { msg: `INCIDENT${turn} — ${drv}`, kind: 'yellow' }
+      }
+      if (entry) items.push({ ...entry, t: m.t, age: t - m.t })
+    }
+    return items.filter(i => i.age <= WINDOW).slice(-2)
+  }, [raceControlMessages, totalLaps, progress, refLapDuration])
+
   // Max sector number for relDist mapping (e.g. circuit has 20 sectors → sector k → [k-1/20, k/20])
   const maxSector = useMemo(() => {
     if (!raceControlMessages) return 20
@@ -890,6 +934,21 @@ export default function TrackMap({
       {showHUD && hudInputs && hudDriver && (
         <div className="hud-overlay">
           <InputsHUD inputs={hudInputs} driver={hudDriver} progress={progress} />
+        </div>
+      )}
+
+      {/* Race control event ticker */}
+      {rcTicker.length > 0 && (
+        <div className="rc-ticker">
+          {rcTicker.map((item) => (
+            <div
+              key={item.t}
+              className={`rc-ticker-item rc-ticker-${item.kind}`}
+              style={{ opacity: Math.max(0.45, 1 - item.age / 90) }}
+            >
+              {item.kind === 'red' ? '● ' : item.kind === 'yellow' ? '● ' : '▸ '}{item.msg}
+            </div>
+          ))}
         </div>
       )}
 

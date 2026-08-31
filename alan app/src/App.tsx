@@ -251,13 +251,17 @@ export default function App() {
 
   const handleSeasonChange = useCallback((season: 'historical' | number) => {
     setSelectedSeason(season)
-    const first = CIRCUITS.find(c =>
+    const candidates = CIRCUITS.filter(c =>
       season === 'historical' ? (c.year !== undefined && c.year < 2026)
       : season === 2026 ? !c.year
       : c.year === season
     )
+    // Prefer the same circuit id in the new season (if it exists and has data), then first with data
+    const first = candidates.find(c => c.id === circuit.id && c.hasData)
+      ?? candidates.find(c => c.hasData)
+      ?? candidates[0]
     if (first) { setCircuit(first); setSession(first.sessions[0]) }
-  }, [])
+  }, [circuit.id])
 
   // Load telemetry for circuits with real data
   useEffect(() => {

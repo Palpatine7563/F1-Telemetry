@@ -139,8 +139,8 @@ export const DRIVER_HIGHLIGHTS: Record<string, DriverHighlight[]> = {
     { race: 'Hungarian GP', year: 2026, note: 'McLaren\'s rear mechanical grip advantage was decisive — Norris was 8 km/h faster through Turn 2 than any rival.' },
   ],
   RUS: [
-    { race: 'Sakhir GP', year: 2020, note: 'Substituting for Hamilton, Russell led for most of the race before a pit stop error and puncture cost him a stunning debut win for Mercedes.' },
-    { race: 'Brazilian GP', year: 2022, note: 'Maiden Formula 1 victory at Interlagos — a composed, controlled drive that confirmed his place among the grid\'s elite.' },
+    { race: 'Sakhir GP', year: 2020, note: 'In his debut race in a Mercedes seat — filling in for the ill Hamilton — Russell led convincingly before a botched pit stop and puncture denied him a sensational win at Bahrain\'s outer layout.' },
+    { race: 'Brazilian GP', year: 2022, note: 'Maiden Formula 1 victory at Interlagos in his first full season for Mercedes — a composed, controlled drive that confirmed his place among the grid\'s elite.' },
   ],
   LEC: [
     { race: 'Bahrain GP', year: 2019, note: 'Won on his Ferrari debut, becoming the second youngest driver to win for the Scuderia — on the same track where he had taken his first pole.' },
@@ -152,9 +152,9 @@ export const DRIVER_HIGHLIGHTS: Record<string, DriverHighlight[]> = {
     { race: 'Dutch GP', year: 2025, note: 'Claimed a grand chelem at Zandvoort — pole, win, fastest lap, and led every lap — a masterclass that underlined his status as a future champion.' },
   ],
   SAI: [
+    { race: 'Australian GP', year: 2024, note: 'Won in Melbourne just days after emergency appendix surgery — one of the most remarkable victories in modern Formula 1, driving through pain to beat the field and silence any doubters ahead of his Ferrari farewell season.' },
     { race: 'British GP', year: 2022, note: 'Won from pole at Silverstone — a commanding drive under intense pressure that produced one of his strongest performances of the season.' },
     { race: 'Singapore GP', year: 2023, note: 'Brilliant lights-to-flag win at Marina Bay, holding off charging rivals on ageing tyres in intense heat and humidity.' },
-    { race: 'Mexico City GP', year: 2024, note: 'Won at the Autodromo Hermanos Rodriguez in dominant fashion — a perfect send-off from Ferrari before his move to Williams.' },
   ],
   ALO: [
     { race: 'Bahrain GP', year: 2005, note: 'Won the race that confirmed his first World Championship — ending Michael Schumacher\'s five-title run at just 24 years old.' },

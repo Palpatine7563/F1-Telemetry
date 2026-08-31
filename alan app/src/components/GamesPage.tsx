@@ -370,8 +370,8 @@ const TRIVIA_BANK: TriviaQ[] = [
   {
     q: 'Which team set the record for the fastest officially-timed F1 pitstop?',
     options: ['McLaren', 'Mercedes', 'Red Bull Racing', 'Ferrari'],
-    answer: 'McLaren',
-    fact: 'McLaren set a 1.80-second pitstop at the 2023 British Grand Prix — the fastest ever officially recorded in Formula 1.',
+    answer: 'Red Bull Racing',
+    fact: 'Red Bull Racing set a 1.82-second pitstop at the 2019 Brazilian Grand Prix — the Guinness World Record for the fastest officially timed stop in Formula 1 history.',
   },
   {
     q: 'Which circuit is nicknamed "The Temple of Speed"?',

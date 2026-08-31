@@ -378,6 +378,7 @@
 .pill:hover { border-color: #445; color: #ccc; }
 .pill.active { background: var(--accent); border-color: var(--accent); color: #fff; font-weight: 700; }
 .pill.small { padding: 2px 8px; font-size: 11px; }
+.pill.small:disabled { opacity: 0.3; cursor: default; pointer-events: none; }
 .pill.locked {
   opacity: 0.55;
   border-style: dashed;

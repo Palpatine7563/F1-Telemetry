@@ -4,7 +4,7 @@ export type IconName =
   | 'track' | 'standings' | 'calendar' | 'results' | 'drivers' | 'teams'
   | 'circuits' | 'pace' | 'predict' | 'insights' | 'games' | 'classics'
   | 'socials' | 'updates' | 'help' | 'settings' | 'radio' | 'camera'
-  | 'battery' | 'lock' | 'arrow-left' | 'arrow-right'
+  | 'battery' | 'lock' | 'arrow-left' | 'arrow-right' | 'chevron-down'
 
 interface Props extends SVGProps<SVGSVGElement> {
   name: IconName
@@ -34,6 +34,7 @@ const paths: Record<IconName, React.ReactNode> = {
   lock: <><rect x="5" y="10" width="14" height="11" rx="2"/><path d="M8 10V7a4 4 0 0 1 8 0v3"/></>,
   'arrow-left': <><path d="m15 18-6-6 6-6"/></>,
   'arrow-right': <><path d="m9 18 6-6-6-6"/></>,
+  'chevron-down': <><path d="m6 9 6 6 6-6"/></>,
 }
 
 export default function Icon({ name, size = 18, ...props }: Props) {

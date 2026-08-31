@@ -1027,13 +1027,21 @@ export default function TrackMap({
             </div>
           )}
         </div>
-        <div className="speed-btns">
-          {(totalLaps > 0 ? [1, 5, 10, 20, 30, 60] : [0.25, 0.5, 1, 3, 5, 10]).map((s) => (
-            <button key={s} className={`speed-btn ${playSpeed === s ? 'active' : ''}`} onClick={() => handleSpeedSelect(s)}>
-              {s}×
-            </button>
-          ))}
-        </div>
+        <label className="playback-speed">
+          <span>Speed</span>
+          <span className="playback-speed-select-wrap">
+            <select
+              value={playSpeed}
+              onChange={(event) => handleSpeedSelect(Number(event.target.value))}
+              aria-label="Playback speed"
+            >
+              {(totalLaps > 0 ? [1, 5, 10, 20, 30, 60] : [0.25, 0.5, 1, 3, 5, 10]).map((speed) => (
+                <option key={speed} value={speed}>{speed}×</option>
+              ))}
+            </select>
+            <Icon name="chevron-down" size={13} />
+          </span>
+        </label>
         <button
           className={`speed-btn ${showHUD ? 'active' : ''}`}
           onClick={() => setShowHUD((v) => !v)}

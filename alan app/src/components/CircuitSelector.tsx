@@ -56,8 +56,7 @@ export default function CircuitSelector({
     <div className="circuit-selector">
       {nextRace && selectedSeason === 2026 && (
         <div className="countdown-bar">
-          <span className="countdown-label">Next GP</span>
-          <span className="countdown-flag">{nextRace.flag}</span>
+          <span className="countdown-label">Up next</span>
           <span className="countdown-name">{nextRace.name}</span>
           <span className="countdown-days">{countdownLabel(nextRace.raceDate)}</span>
         </div>
@@ -79,7 +78,7 @@ export default function CircuitSelector({
       </div>
 
       <div className="selector-group">
-        <label>Circuit</label>
+        <label>Race</label>
         <div className="pill-row">
           {seasonCircuits.map((c) => {
             const locked = !c.hasData
@@ -94,7 +93,8 @@ export default function CircuitSelector({
                   onSessionChange(c.sessions[0])
                 }}
               >
-                {c.flag} {c.name}{locked ? ' ★' : ''}
+                {c.name}
+                {locked && <span className="pill-status">Preview</span>}
               </button>
             )
           })}

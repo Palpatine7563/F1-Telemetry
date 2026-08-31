@@ -45,6 +45,7 @@ import BattleTracker from './components/BattleTracker'
 import HistoricalRacesPage from './components/HistoricalRacesPage'
 import PositionChart from './components/PositionChart'
 import Settings, { getStoredTheme, applyTheme } from './components/Settings'
+import Icon from './components/Icon'
 import './App.css'
 
 export default function App() {
@@ -653,7 +654,7 @@ export default function App() {
     {
       selector: '.playback-bar',
       title: 'Team radio',
-      body: "Press the 📻 button to enable synchronized team radio. Real clips from drivers and engineers play at the exact moment they happened in the race.",
+      body: "Use the Radio control to enable synchronized team radio. Real clips from drivers and engineers play at the exact moment they happened in the race.",
       placement: 'top',
     },
     {
@@ -664,7 +665,7 @@ export default function App() {
     {
       selector: '.app-header',
       title: "That's it!",
-      body: "Explore Pace Analysis, Standings, and Calendar in the sidebar. Drop a CSV file anywhere to load custom telemetry. Enjoy the data! 🏎️",
+      body: "Explore Pace Analysis, Standings, and Calendar in the navigation. Drop a CSV file anywhere to load custom telemetry.",
       placement: 'bottom',
     },
   ]
@@ -725,41 +726,46 @@ export default function App() {
       <header className="app-header">
         <div className="logo">
           <span className="logo-f1">F1</span>
-          <span className="logo-text">Telemetry Visualizer</span>
+          <span className="logo-divider" />
+          <span className="logo-text">Telemetry</span>
         </div>
+        <span className="header-context">Race data, replayed</span>
         {loading && activeView === 'telemetry' && <span className="loading-badge">Loading…</span>}
-        <button
-          className="tutorial-trigger"
-          onClick={() => setTutorialOpen(true)}
-          title="Tour the features"
-        >?</button>
-        <button
-          className={`comments-toggle-btn ${commentsOpen ? 'active' : ''}`}
-          onClick={() => setCommentsOpen(v => !v)}
-          title="Toggle comments"
-        >
-          💬
-        </button>
-        {authUser ? (
-          <button className="auth-user-btn" onClick={() => supabase.auth.signOut()} title="Sign out">
-            {(authUser.user_metadata?.full_name ?? authUser.email ?? 'User').split(' ')[0]}
-          </button>
-        ) : (
-          <button className="auth-signin-header-btn" onClick={() => setAuthModalOpen(true)}>
-            Sign in
-          </button>
-        )}
-        <div style={{ position: 'relative' }}>
+        <div className="header-actions">
           <button
-            className={`settings-trigger ${settingsOpen ? 'active' : ''}`}
+            className="header-action-btn tutorial-trigger"
+            onClick={() => setTutorialOpen(true)}
+            title="Tour the features"
+          ><Icon name="help" size={17} /><span>Help</span></button>
+          <button
+            className={`header-action-btn comments-toggle-btn ${commentsOpen ? 'active' : ''}`}
+            onClick={() => setCommentsOpen(v => !v)}
+            title="Open community comments"
+          >
+            <Icon name="socials" size={17} /><span>Community</span>
+          </button>
+          {authUser ? (
+            <button className="auth-user-btn" onClick={() => supabase.auth.signOut()} title="Sign out">
+              {(authUser.user_metadata?.full_name ?? authUser.email ?? 'User').split(' ')[0]}
+            </button>
+          ) : (
+            <button className="auth-signin-header-btn" onClick={() => setAuthModalOpen(true)}>
+              Sign in
+            </button>
+          )}
+          <div className="settings-wrap">
+          <button
+            className={`header-action-btn settings-trigger ${settingsOpen ? 'active' : ''}`}
             onClick={() => setSettingsOpen(v => !v)}
             title="Appearance settings"
-          >⚙</button>
+            aria-label="Appearance settings"
+          ><Icon name="settings" size={17} /></button>
           {settingsOpen && <Settings onClose={() => setSettingsOpen(false)} />}
+          </div>
+          <a href="https://www.buymeacoffee.com/PrivateTiles" target="_blank" rel="noopener noreferrer" className="bmc-btn">
+            Support the project
+          </a>
         </div>
-        <a href="https://www.buymeacoffee.com/PrivateTiles" target="_blank" rel="noopener noreferrer" className="bmc-btn">
-          <img src="https://img.buymeacoffee.com/button-api/?text=Buy me a coffee&emoji=&slug=PrivateTiles&button_colour=FFDD00&font_colour=000000&font_family=Cookie&outline_colour=000000&coffee_colour=ffffff" alt="Buy me a coffee" />
-        </a>
       </header>
 
       <div className="app-body">
@@ -909,7 +915,7 @@ export default function App() {
                                 title="Download clip"
                               >↓</button>
                             )}
-                            <span className="radio-wave-icon" style={{ marginLeft: profile?.tier === 'pro' ? '0' : 'auto' }}>📻</span>
+                            <span className="radio-wave-icon" style={{ marginLeft: profile?.tier === 'pro' ? '0' : 'auto' }}><Icon name="radio" size={15} /></span>
                           </div>
                           {activeRadioCaption.text && (
                             <div className="radio-caption-box-text">{activeRadioCaption.text}</div>

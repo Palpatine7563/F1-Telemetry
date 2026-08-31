@@ -10,6 +10,7 @@ import type { BattleGapEntry } from '../lib/battleGaps'
 import type { SafetyCarPeriod, PitStopInfo } from '../lib/csvLoader'
 import InputsHUD from './InputsHUD'
 import SatelliteView from './SatelliteView'
+import Icon from './Icon'
 
 const SVG_W = 900
 const SVG_H = 600
@@ -908,7 +909,7 @@ export default function TrackMap({
       {showClipTip && (
         <div className="clip-tip-overlay" onClick={() => setShowClipTip(false)}>
           <div className="clip-tip-box">
-            <span className="clip-tip-icon">🔋</span>
+            <span className="clip-tip-icon"><Icon name="battery" size={22} /></span>
             <div>
               <strong>Battery clip zones</strong>
               <p>Orange sections = full throttle but speed dropping. This is where the driver's ERS battery runs out of charge mid-straight, losing the electric power boost.</p>
@@ -921,13 +922,13 @@ export default function TrackMap({
       {/* Safety car / red flag badge */}
       {totalLaps > 0 && currentSC && (
         <div className={`sc-badge sc-badge-${currentSC.type.toLowerCase()}`}>
-          {currentSC.type === 'RED' ? '🔴 RED FLAG' : currentSC.type === 'VSC' ? 'VIRTUAL SC' : '🟡 SAFETY CAR'}
+          {currentSC.type === 'RED' ? 'RED FLAG' : currentSC.type === 'VSC' ? 'VIRTUAL SAFETY CAR' : 'SAFETY CAR'}
         </div>
       )}
 
       {/* Chequered flag badge when race ends */}
       {totalLaps > 0 && !currentSC && progress >= 0.999 && (
-        <div className="sc-badge sc-badge-finish">🏁 RACE ENDED</div>
+        <div className="sc-badge sc-badge-finish">RACE ENDED</div>
       )}
 
       {/* Inputs HUD overlay */}
@@ -955,7 +956,7 @@ export default function TrackMap({
       {/* High-speed warning */}
       {showSpeedWarn && (
         <div className="speed-warn-toast">
-          ⚠️ At high speeds, live positions and gaps may be less accurate
+          At high speeds, live positions and gaps may be less accurate
         </div>
       )}
 
@@ -1051,8 +1052,9 @@ export default function TrackMap({
           className="speed-btn screenshot-btn"
           onClick={handleScreenshot}
           title="Save screenshot as PNG"
+          aria-label="Save screenshot as PNG"
         >
-          📷
+          <Icon name="camera" size={14} />
         </button>
         {radioCallsWithProgress && radioCallsWithProgress.length > 0 && (
           <>
@@ -1064,8 +1066,9 @@ export default function TrackMap({
                 if (next) onTuneDriver?.(null)   // reset driver lock when re-enabling
               }}
               title={radioEnabled ? 'Mute team radio' : 'Enable team radio'}
+              aria-label={radioEnabled ? 'Mute team radio' : 'Enable team radio'}
             >
-              📻
+              <Icon name="radio" size={14} />
             </button>
             {radioEnabled && navCalls.length > 0 && (
               <div className="radio-nav">
@@ -1079,7 +1082,8 @@ export default function TrackMap({
                   onClick={goToPrevRadio}
                   disabled={currentNavIdx <= 0}
                   title="Previous radio message"
-                >⏮</button>
+                  aria-label="Previous radio message"
+                ><Icon name="arrow-left" size={14} /></button>
                 <span className="radio-nav-count">
                   {Math.max(0, currentNavIdx + 1)}/{navCalls.length}
                 </span>
@@ -1088,7 +1092,8 @@ export default function TrackMap({
                   onClick={goToNextRadio}
                   disabled={currentNavIdx >= navCalls.length - 1}
                   title="Next radio message"
-                >⏭</button>
+                  aria-label="Next radio message"
+                ><Icon name="arrow-right" size={14} /></button>
               </div>
             )}
             {radioEnabled && activeRadioCall && (
@@ -1099,7 +1104,7 @@ export default function TrackMap({
               >
                 <span className="radio-driver-dot" style={{ background: driverColor(activeRadioCall.driver) }} />
                 <span className="radio-driver-name">{activeRadioCall.driver}</span>
-                <span className="radio-wave-icon">📻</span>
+                <span className="radio-wave-icon"><Icon name="radio" size={14} /></span>
               </div>
             )}
             {radioEnabled && tunedDriver && !activeRadioCall && (
@@ -1113,7 +1118,7 @@ export default function TrackMap({
                   style={{ background: driverColor(tunedDriver) }}
                 />
                 <span className="radio-driver-name">{tunedDriver}</span>
-                <span className="radio-wave-icon">🔒</span>
+                <span className="radio-wave-icon"><Icon name="lock" size={14} /></span>
               </div>
             )}
           </>

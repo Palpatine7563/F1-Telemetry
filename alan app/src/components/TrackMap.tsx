@@ -1089,22 +1089,24 @@ export default function TrackMap({
 
       {/* Playback controls */}
       <div className="playback-bar">
-        <button className="play-btn" onClick={onPlayPause}>{playing ? '⏸' : '▶'}</button>
+        <div className="playback-primary">
+          <button className="play-btn" onClick={onPlayPause}>{playing ? '⏸' : '▶'}</button>
 
-        {/* Lap counter for full-race mode */}
-        {totalLaps > 0 && (
-          <span className="lap-counter">
-            L{Math.min(totalLaps, Math.floor(progress * totalLaps) + 1)}/{totalLaps}
-          </span>
-        )}
+          {/* Lap counter for full-race mode */}
+          {totalLaps > 0 && (
+            <span className="lap-counter">
+              L{Math.min(totalLaps, Math.floor(progress * totalLaps) + 1)}/{totalLaps}
+            </span>
+          )}
 
-        <div className="progress-slider-wrap">
-          <input
-            type="range" min={0} max={1000}
-            value={Math.round(progress * 1000)}
-            onChange={(e) => onProgressChange(parseInt(e.target.value) / 1000)}
-            className="progress-slider"
-          />
+          <div className="progress-slider-wrap">
+            <input
+              type="range" min={0} max={1000}
+              value={Math.round(progress * 1000)}
+              onChange={(e) => onProgressChange(parseInt(e.target.value) / 1000)}
+              className="progress-slider"
+              aria-label="Race progress"
+            />
           {/* Safety car period bands */}
           {safetyCars.length > 0 && (
             <div className="sc-bands" aria-hidden>
@@ -1138,23 +1140,26 @@ export default function TrackMap({
             </div>
           )}
           {/* Team radio markers */}
-          {radioCallsWithProgress && radioCallsWithProgress.length > 0 && radioEnabled && (
-            <div className="radio-marks" aria-hidden>
-              {radioCallsWithProgress.map((r, i) => (
-                <div
-                  key={i}
-                  className="radio-mark"
-                  style={{
-                    left: `${Math.min(r.progress, 1) * 100}%`,
-                    borderColor: driverColor(r.driver),
-                    opacity: !tunedDriver || tunedDriver === r.driver ? 0.85 : 0.2,
-                  }}
-                />
-              ))}
-            </div>
-          )}
+            {radioCallsWithProgress && radioCallsWithProgress.length > 0 && radioEnabled && (
+              <div className="radio-marks" aria-hidden>
+                {radioCallsWithProgress.map((r, i) => (
+                  <div
+                    key={i}
+                    className="radio-mark"
+                    style={{
+                      left: `${Math.min(r.progress, 1) * 100}%`,
+                      borderColor: driverColor(r.driver),
+                      opacity: !tunedDriver || tunedDriver === r.driver ? 0.85 : 0.2,
+                    }}
+                  />
+                ))}
+              </div>
+            )}
+          </div>
         </div>
-        <label className="playback-speed">
+
+        <div className="playback-tools" aria-label="Playback tools">
+          <label className="playback-speed">
           <span>Speed</span>
           <span className="playback-speed-select-wrap">
             <select
@@ -1258,23 +1263,24 @@ export default function TrackMap({
             )}
           </>
         )}
-        {totalLaps === 0 && (
-          <button
-            className={`speed-btn ${showClip ? 'active clip-btn' : ''}`}
-            onClick={() => {
-              const next = !showClip
-              setShowClip(next)
-              if (next && !localStorage.getItem('f1vis_clip_seen')) {
-                setShowClipTip(true)
-                localStorage.setItem('f1vis_clip_seen', '1')
-                setTimeout(() => setShowClipTip(false), 5000)
-              }
-            }}
-            title="Highlight battery clip zones (full throttle + speed drop)"
-          >
-            CLIP
-          </button>
-        )}
+          {totalLaps === 0 && (
+            <button
+              className={`speed-btn ${showClip ? 'active clip-btn' : ''}`}
+              onClick={() => {
+                const next = !showClip
+                setShowClip(next)
+                if (next && !localStorage.getItem('f1vis_clip_seen')) {
+                  setShowClipTip(true)
+                  localStorage.setItem('f1vis_clip_seen', '1')
+                  setTimeout(() => setShowClipTip(false), 5000)
+                }
+              }}
+              title="Highlight battery clip zones (full throttle + speed drop)"
+            >
+              CLIP
+            </button>
+          )}
+        </div>
       </div>
     </div>
   )

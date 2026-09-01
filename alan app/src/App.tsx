@@ -48,6 +48,14 @@ import Settings, { getStoredTheme, applyTheme } from './components/Settings'
 import Icon from './components/Icon'
 import './App.css'
 
+const DEFAULT_DRIVER_PANE_WIDTH = 224
+const DEFAULT_RIGHT_PANE_WIDTH = 268
+
+function storedPaneWidth(key: string, fallback: number, min: number, max: number): number {
+  const value = Number(localStorage.getItem(key))
+  return Number.isFinite(value) && value >= min && value <= max ? value : fallback
+}
+
 export default function App() {
   const [selectedSeason, setSelectedSeason] = useState<'historical' | number>(2026)
   const [circuit, setCircuit] = useState<CircuitConfig>(() => {
@@ -82,6 +90,18 @@ export default function App() {
   const [isDragging, setIsDragging] = useState(false)
   const [pendingResultRound, setPendingResultRound] = useState<number | undefined>(undefined)
   const dragCounter = useRef(0)
+  const [resizingPane, setResizingPane] = useState<'driver' | 'right' | null>(null)
+  const [paneWidths, setPaneWidths] = useState(() => ({
+    driver: storedPaneWidth('f1vis_driver_pane_width', DEFAULT_DRIVER_PANE_WIDTH, 150, 360),
+    right: storedPaneWidth('f1vis_right_pane_width', DEFAULT_RIGHT_PANE_WIDTH, 180, 420),
+  }))
+  const paneWidthsRef = useRef(paneWidths)
+  const paneResizeRef = useRef<{
+    side: 'driver' | 'right'
+    pointerId: number
+    startX: number
+    startWidth: number
+  } | null>(null)
 
   const [lapBoundaries, setLapBoundaries] = useState<number[]>([])
   const [totalLaps, setTotalLaps] = useState(0)
@@ -237,6 +257,65 @@ export default function App() {
     setIsDragging(false)
     processFiles(Array.from(e.dataTransfer.files))
   }, [processFiles])
+
+  const updatePaneWidth = useCallback((side: 'driver' | 'right', requestedWidth: number) => {
+    const min = side === 'driver' ? 150 : 180
+    const max = side === 'driver' ? 360 : 420
+    const width = Math.max(min, Math.min(max, Math.round(requestedWidth)))
+    const next = { ...paneWidthsRef.current, [side]: width }
+    paneWidthsRef.current = next
+    setPaneWidths(next)
+  }, [])
+
+  const handlePaneResizeStart = useCallback((side: 'driver' | 'right', e: React.PointerEvent<HTMLDivElement>) => {
+    if (window.matchMedia('(max-width: 768px)').matches) return
+    e.preventDefault()
+    e.currentTarget.setPointerCapture(e.pointerId)
+    paneResizeRef.current = {
+      side,
+      pointerId: e.pointerId,
+      startX: e.clientX,
+      startWidth: paneWidthsRef.current[side],
+    }
+    setResizingPane(side)
+  }, [])
+
+  const handlePaneResizeMove = useCallback((e: React.PointerEvent<HTMLDivElement>) => {
+    const drag = paneResizeRef.current
+    if (!drag || drag.pointerId !== e.pointerId) return
+    const delta = e.clientX - drag.startX
+    updatePaneWidth(drag.side, drag.startWidth + (drag.side === 'driver' ? delta : -delta))
+  }, [updatePaneWidth])
+
+  const handlePaneResizeEnd = useCallback((e: React.PointerEvent<HTMLDivElement>) => {
+    const drag = paneResizeRef.current
+    if (!drag || drag.pointerId !== e.pointerId) return
+    paneResizeRef.current = null
+    setResizingPane(null)
+    localStorage.setItem('f1vis_driver_pane_width', String(paneWidthsRef.current.driver))
+    localStorage.setItem('f1vis_right_pane_width', String(paneWidthsRef.current.right))
+    if (e.currentTarget.hasPointerCapture(e.pointerId)) e.currentTarget.releasePointerCapture(e.pointerId)
+  }, [])
+
+  const handlePaneResizeKey = useCallback((side: 'driver' | 'right', e: React.KeyboardEvent<HTMLDivElement>) => {
+    if (e.key !== 'ArrowLeft' && e.key !== 'ArrowRight') return
+    e.preventDefault()
+    const delta = e.key === 'ArrowRight' ? 16 : -16
+    updatePaneWidth(side, paneWidthsRef.current[side] + (side === 'driver' ? delta : -delta))
+    localStorage.setItem(
+      side === 'driver' ? 'f1vis_driver_pane_width' : 'f1vis_right_pane_width',
+      String(paneWidthsRef.current[side]),
+    )
+  }, [updatePaneWidth])
+
+  const resetPaneWidth = useCallback((side: 'driver' | 'right') => {
+    const width = side === 'driver' ? DEFAULT_DRIVER_PANE_WIDTH : DEFAULT_RIGHT_PANE_WIDTH
+    updatePaneWidth(side, width)
+    localStorage.setItem(
+      side === 'driver' ? 'f1vis_driver_pane_width' : 'f1vis_right_pane_width',
+      String(width),
+    )
+  }, [updatePaneWidth])
 
   const handleCircuitChange = useCallback((c: CircuitConfig) => {
     setCircuit(c)
@@ -816,7 +895,13 @@ export default function App() {
                 onSeasonChange={handleSeasonChange}
               />
 
-              <div className="main-layout">
+              <div
+                className={`main-layout ${hasDisplayData ? 'resizable-panes' : ''} ${resizingPane ? 'resizing-panes' : ''}`}
+                style={hasDisplayData ? {
+                  '--driver-pane-width': `${paneWidths.driver}px`,
+                  '--right-pane-width': `${paneWidths.right}px`,
+                } as React.CSSProperties : undefined}
+              >
                 {hasDisplayData ? (
                   <>
                     <DriverPanel
@@ -838,6 +923,24 @@ export default function App() {
                       currentCompounds={totalLaps > 0 && Object.keys(currentCompounds).length > 0 ? currentCompounds : undefined}
                       tunedDriver={radioCallsWithProgress.length > 0 ? tunedDriver : undefined}
                       onTuneDriver={radioCallsWithProgress.length > 0 ? setTunedDriver : undefined}
+                    />
+
+                    <div
+                      className="pane-resizer"
+                      role="separator"
+                      aria-label="Resize drivers panel"
+                      aria-orientation="vertical"
+                      aria-valuemin={150}
+                      aria-valuemax={360}
+                      aria-valuenow={paneWidths.driver}
+                      tabIndex={0}
+                      onPointerDown={(e) => handlePaneResizeStart('driver', e)}
+                      onPointerMove={handlePaneResizeMove}
+                      onPointerUp={handlePaneResizeEnd}
+                      onPointerCancel={handlePaneResizeEnd}
+                      onKeyDown={(e) => handlePaneResizeKey('driver', e)}
+                      onDoubleClick={() => resetPaneWidth('driver')}
+                      title="Drag to resize Drivers. Double-click to reset."
                     />
 
                     <div className="center-pane">
@@ -893,6 +996,24 @@ export default function App() {
                         />
                       )}
                     </div>
+
+                    <div
+                      className="pane-resizer"
+                      role="separator"
+                      aria-label="Resize battle panel"
+                      aria-orientation="vertical"
+                      aria-valuemin={180}
+                      aria-valuemax={420}
+                      aria-valuenow={paneWidths.right}
+                      tabIndex={0}
+                      onPointerDown={(e) => handlePaneResizeStart('right', e)}
+                      onPointerMove={handlePaneResizeMove}
+                      onPointerUp={handlePaneResizeEnd}
+                      onPointerCancel={handlePaneResizeEnd}
+                      onKeyDown={(e) => handlePaneResizeKey('right', e)}
+                      onDoubleClick={() => resetPaneWidth('right')}
+                      title="Drag to resize Battle. Double-click to reset."
+                    />
 
                     <div className="right-pane">
                       <BattleTracker

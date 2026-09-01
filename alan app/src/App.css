@@ -5289,8 +5289,36 @@
 .selector-next-days { color: #ff6762; font-size: 11px; font-weight: 650; white-space: nowrap; }
 
 .main-layout { gap: 16px; padding: 16px; }
-.driver-panel { width: 224px; }
-.right-pane { width: 268px; }
+.main-layout.resizable-panes { gap: 0; }
+.driver-panel { width: var(--driver-pane-width, 224px); }
+.right-pane { width: var(--right-pane-width, 268px); }
+.pane-resizer {
+  position: relative;
+  width: 16px;
+  flex: 0 0 16px;
+  cursor: col-resize;
+  touch-action: none;
+  outline: none;
+}
+.pane-resizer::before {
+  content: '';
+  position: absolute;
+  top: 12px;
+  bottom: 12px;
+  left: 7px;
+  width: 2px;
+  border-radius: 2px;
+  background: #27313b;
+  transition: width 0.15s, left 0.15s, background 0.15s;
+}
+.pane-resizer:hover::before,
+.pane-resizer:focus-visible::before,
+.resizing-panes .pane-resizer::before {
+  left: 6px;
+  width: 4px;
+  background: var(--accent);
+}
+.main-layout.resizing-panes { cursor: col-resize; user-select: none; }
 .panel-header,
 .battle-header { min-height: 50px; padding: 0 16px; }
 .panel-title,
@@ -5375,8 +5403,8 @@
 @media (max-width: 1180px) {
   .selector-next-race { display: none; }
   .selector-fields { max-width: none; }
-  .driver-panel { width: 204px; }
-  .right-pane { width: 236px; }
+  .driver-panel { width: var(--driver-pane-width, 204px); }
+  .right-pane { width: var(--right-pane-width, 236px); }
 }
 
 /* Laptop layouts often report 1470–1680 CSS pixels even on a 13-inch panel. */
@@ -5414,7 +5442,9 @@
   }
   .selector-field-session { grid-column: 1 / -1; }
   .selector-select { height: 40px; font-size: 12px; }
-  .main-layout { gap: 10px; padding: 10px; }
+  .main-layout,
+  .main-layout.resizable-panes { gap: 10px; padding: 10px; }
+  .pane-resizer { display: none; }
   .driver-panel { width: 100%; }
   .driver-row { min-height: 60px; }
   .right-pane { width: 100%; }

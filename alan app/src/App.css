@@ -5379,7 +5379,8 @@
   .right-pane { width: 236px; }
 }
 
-@media (max-width: 1440px) {
+/* Laptop layouts often report 1470–1680 CSS pixels even on a 13-inch panel. */
+@media (max-width: 1680px) {
   .playback-bar {
     min-height: 92px;
     flex-direction: column;

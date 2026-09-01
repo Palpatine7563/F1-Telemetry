@@ -4885,6 +4885,10 @@
   min-height: 34px;
   margin-left: 0;
   padding: 0 14px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 7px;
   border: 1px solid rgba(225, 6, 0, 0.45);
   border-radius: 7px;
   color: #ff6b67;
@@ -5072,7 +5076,8 @@
   .driver-panel { width: 190px; }
   .header-action-btn span { display: none; }
   .header-action-btn { width: 34px; padding: 0; }
-  .bmc-btn { display: none; }
+  .bmc-btn { width: 34px; padding: 0; }
+  .bmc-btn span { display: none; }
   .footer-legal { display: none; }
 }
 

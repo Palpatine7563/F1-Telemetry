@@ -4,7 +4,7 @@ export type IconName =
   | 'track' | 'standings' | 'calendar' | 'results' | 'drivers' | 'teams'
   | 'circuits' | 'pace' | 'predict' | 'insights' | 'games' | 'classics'
   | 'socials' | 'updates' | 'help' | 'settings' | 'radio' | 'camera'
-  | 'battery' | 'lock' | 'arrow-left' | 'arrow-right' | 'chevron-down'
+  | 'battery' | 'lock' | 'coffee' | 'arrow-left' | 'arrow-right' | 'chevron-down'
 
 interface Props extends SVGProps<SVGSVGElement> {
   name: IconName
@@ -32,6 +32,7 @@ const paths: Record<IconName, React.ReactNode> = {
   camera: <><path d="M4 7h4l1.5-2h5L16 7h4v12H4z"/><circle cx="12" cy="13" r="3"/></>,
   battery: <><rect x="3" y="7" width="16" height="10" rx="2"/><path d="M21 10v4M8 10l-2 3h3l-2 3"/></>,
   lock: <><rect x="5" y="10" width="14" height="11" rx="2"/><path d="M8 10V7a4 4 0 0 1 8 0v3"/></>,
+  coffee: <><path d="M5 8h12v7a5 5 0 0 1-5 5h-2a5 5 0 0 1-5-5V8Z"/><path d="M17 10h1.5a2.5 2.5 0 0 1 0 5H17M8 4v1M12 3v2M16 4v1"/></>,
   'arrow-left': <><path d="m15 18-6-6 6-6"/></>,
   'arrow-right': <><path d="m9 18 6-6-6-6"/></>,
   'chevron-down': <><path d="m6 9 6 6 6-6"/></>,

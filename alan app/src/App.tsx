@@ -762,8 +762,16 @@ export default function App() {
           ><Icon name="settings" size={17} /></button>
           {settingsOpen && <Settings onClose={() => setSettingsOpen(false)} />}
           </div>
-          <a href="https://www.buymeacoffee.com/PrivateTiles" target="_blank" rel="noopener noreferrer" className="bmc-btn">
-            Support the project
+          <a
+            href="https://www.buymeacoffee.com/PrivateTiles"
+            target="_blank"
+            rel="noopener noreferrer"
+            className="bmc-btn"
+            aria-label="Buy me a coffee"
+            title="Buy me a coffee"
+          >
+            <Icon name="coffee" size={17} />
+            <span>Support the project</span>
           </a>
         </div>
       </header>

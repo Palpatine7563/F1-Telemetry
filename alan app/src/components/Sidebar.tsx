@@ -19,12 +19,12 @@ const NAV: Array<{ heading: string; items: Array<{ id: AppView; icon: IconName; 
     { id: 'teams', icon: 'teams', label: 'Teams', title: 'Teams' },
     { id: 'circuits', icon: 'circuits', label: 'Circuits', title: 'Circuits' },
     { id: 'insights', icon: 'insights', label: 'Insights', title: 'Race insights' },
+    { id: 'games', icon: 'games', label: 'Games', title: 'F1 games' },
   ] },
   { heading: 'Analysis', items: [
     { id: 'pace', icon: 'pace', label: 'Pace analysis', title: 'Pace analysis' },
     { id: 'pace2', icon: 'predict', label: 'Predictions', title: 'Predictions' },
     { id: 'historicalraces', icon: 'classics', label: 'Classic races', title: 'Historic race replays' },
-    { id: 'games', icon: 'games', label: 'Games', title: 'F1 games' },
   ] },
   { heading: 'More', items: [
     { id: 'socials', icon: 'socials', label: 'Community', title: 'Community' },

@@ -1,4 +1,5 @@
 import { useMemo, useRef, useEffect, useState, useCallback } from 'react'
+import type { PointerEvent as ReactPointerEvent, WheelEvent as ReactWheelEvent } from 'react'
 import html2canvas from 'html2canvas'
 import type { TelemetryPoint } from '../types'
 import { interpolatePositionAtTime, interpolateInputsAtTime } from '../lib/miniSectors'
@@ -141,10 +142,20 @@ export default function TrackMap({
   const [showSpeedWarn,    setShowSpeedWarn]    = useState(false)
   const [radioEnabled,     setRadioEnabled]     = useState(false)
   const [activeRadioCall,  setActiveRadioCall]  = useState<{ driver: string; url: string; text?: string } | null>(null)
+  const [trackZoom,        setTrackZoom]        = useState(1)
+  const [trackPan,         setTrackPan]         = useState({ x: 0, y: 0 })
   const speedWarnTimer  = useRef<ReturnType<typeof setTimeout> | null>(null)
   const audioRef        = useRef<HTMLAudioElement | null>(null)
   const lastRadioIdxRef = useRef(-1)
   const prevProgressRef = useRef(0)
+  const trackDragRef = useRef<{
+    pointerId: number
+    startX: number
+    startY: number
+    panX: number
+    panY: number
+    zoom: number
+  } | null>(null)
 
   // poleDriver = fastest; refLapDuration = slowest (animation runs until all finish)
   // Declared early — used by radio useEffects below before the main useMemo block.
@@ -603,6 +614,74 @@ export default function TrackMap({
     [allPoints, transform]
   )
 
+  const updateTrackZoom = useCallback((requestedZoom: number) => {
+    const nextZoom = Math.max(1, Math.min(4, Math.round(requestedZoom * 2) / 2))
+    const maxPanX = (SVG_W - SVG_W / nextZoom) / 2
+    const maxPanY = (SVG_H - SVG_H / nextZoom) / 2
+
+    setTrackZoom(nextZoom)
+    setTrackPan((current) => nextZoom === 1
+      ? { x: 0, y: 0 }
+      : {
+          x: Math.max(-maxPanX, Math.min(maxPanX, current.x)),
+          y: Math.max(-maxPanY, Math.min(maxPanY, current.y)),
+        })
+  }, [])
+
+  const handleTrackPointerDown = useCallback((event: ReactPointerEvent<SVGSVGElement>) => {
+    if (trackZoom <= 1) return
+    event.preventDefault()
+    event.currentTarget.setPointerCapture(event.pointerId)
+    trackDragRef.current = {
+      pointerId: event.pointerId,
+      startX: event.clientX,
+      startY: event.clientY,
+      panX: trackPan.x,
+      panY: trackPan.y,
+      zoom: trackZoom,
+    }
+  }, [trackPan, trackZoom])
+
+  const handleTrackPointerMove = useCallback((event: ReactPointerEvent<SVGSVGElement>) => {
+    const drag = trackDragRef.current
+    if (!drag || drag.pointerId !== event.pointerId) return
+    const rect = event.currentTarget.getBoundingClientRect()
+    if (rect.width === 0 || rect.height === 0) return
+
+    const viewWidth = SVG_W / drag.zoom
+    const viewHeight = SVG_H / drag.zoom
+    const dx = (event.clientX - drag.startX) * viewWidth / rect.width
+    const dy = (event.clientY - drag.startY) * viewHeight / rect.height
+    const maxPanX = (SVG_W - viewWidth) / 2
+    const maxPanY = (SVG_H - viewHeight) / 2
+    setTrackPan({
+      x: Math.max(-maxPanX, Math.min(maxPanX, drag.panX - dx)),
+      y: Math.max(-maxPanY, Math.min(maxPanY, drag.panY - dy)),
+    })
+  }, [])
+
+  const handleTrackPointerEnd = useCallback((event: ReactPointerEvent<SVGSVGElement>) => {
+    if (trackDragRef.current?.pointerId !== event.pointerId) return
+    trackDragRef.current = null
+    if (event.currentTarget.hasPointerCapture(event.pointerId)) {
+      event.currentTarget.releasePointerCapture(event.pointerId)
+    }
+  }, [])
+
+  const handleTrackWheel = useCallback((event: ReactWheelEvent<SVGSVGElement>) => {
+    event.preventDefault()
+    updateTrackZoom(trackZoom + (event.deltaY < 0 ? 0.5 : -0.5))
+  }, [trackZoom, updateTrackZoom])
+
+  const trackViewWidth = SVG_W / trackZoom
+  const trackViewHeight = SVG_H / trackZoom
+  const trackViewBox = [
+    (SVG_W - trackViewWidth) / 2 + trackPan.x,
+    (SVG_H - trackViewHeight) / 2 + trackPan.y,
+    trackViewWidth,
+    trackViewHeight,
+  ].join(' ')
+
   return (
     <div className="track-map-container" ref={containerRef}>
       {showSatellite ? (
@@ -615,7 +694,19 @@ export default function TrackMap({
           onCameraDriverChange={setSatCamDriver}
         />
       ) : (
-        <svg width={SVG_W} height={SVG_H} viewBox={`0 0 ${SVG_W} ${SVG_H}`} className="track-svg" shapeRendering="geometricPrecision">
+        <svg
+          width={SVG_W}
+          height={SVG_H}
+          viewBox={trackViewBox}
+          className={`track-svg ${trackZoom > 1 ? 'zoomed' : ''}`}
+          shapeRendering="geometricPrecision"
+          onPointerDown={handleTrackPointerDown}
+          onPointerMove={handleTrackPointerMove}
+          onPointerUp={handleTrackPointerEnd}
+          onPointerCancel={handleTrackPointerEnd}
+          onWheel={handleTrackWheel}
+          onDoubleClick={() => updateTrackZoom(trackZoom + 0.5)}
+        >
 
           {/* Optional dropped background image */}
           {bgImageUrl && (
@@ -903,6 +994,42 @@ export default function TrackMap({
             </text>
           )}
         </svg>
+      )}
+
+      {!showSatellite && hasData && (
+        <div className="track-zoom-controls" role="group" aria-label="Track zoom controls">
+          <button
+            type="button"
+            className="track-zoom-btn"
+            onClick={() => updateTrackZoom(trackZoom - 0.5)}
+            disabled={trackZoom <= 1}
+            aria-label="Zoom out from track"
+            title="Zoom out"
+          >
+            <Icon name="minus" size={15} />
+          </button>
+          <span className="track-zoom-value" aria-live="polite">{Math.round(trackZoom * 100)}%</span>
+          <button
+            type="button"
+            className="track-zoom-btn"
+            onClick={() => updateTrackZoom(trackZoom + 0.5)}
+            disabled={trackZoom >= 4}
+            aria-label="Zoom in on track"
+            title="Zoom in"
+          >
+            <Icon name="plus" size={15} />
+          </button>
+          <button
+            type="button"
+            className="track-zoom-btn track-zoom-reset"
+            onClick={() => updateTrackZoom(1)}
+            disabled={trackZoom === 1 && trackPan.x === 0 && trackPan.y === 0}
+            aria-label="Reset track zoom"
+            title="Reset zoom"
+          >
+            <Icon name="reset" size={14} />
+          </button>
+        </div>
       )}
 
       {/* Clip zones tooltip (first-time) */}

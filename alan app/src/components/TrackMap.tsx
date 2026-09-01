@@ -83,7 +83,6 @@ interface Props {
   onProgressChange: (p: number | ((prev: number) => number)) => void
   playing: boolean
   onPlayPause: () => void
-  bgImageUrl?: string
   battleGaps?: BattleGapEntry[]
   lapBoundaries?: number[]
   totalLaps?: number
@@ -111,7 +110,6 @@ export default function TrackMap({
   onProgressChange,
   playing,
   onPlayPause,
-  bgImageUrl,
   battleGaps = [],
   lapBoundaries = [],
   totalLaps = 0,
@@ -707,12 +705,6 @@ export default function TrackMap({
           onWheel={handleTrackWheel}
           onDoubleClick={() => updateTrackZoom(trackZoom + 0.5)}
         >
-
-          {/* Optional dropped background image */}
-          {bgImageUrl && (
-            <image href={bgImageUrl} x={0} y={0} width={SVG_W} height={SVG_H}
-              preserveAspectRatio="xMidYMid meet" opacity={0.35} />
-          )}
 
           {/* Pit lane (full race only) — drawn below the racing line */}
           {totalLaps > 0 && pitLaneSegments.length > 0 && pitLaneSegments.map((seg, i) => {

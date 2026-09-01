@@ -79,7 +79,6 @@ export default function App() {
   const [activeView, setActiveView] = useState<AppView>(() => hashToView(window.location.hash))
   const [battleDrivers, setBattleDrivers] = useState<string[]>([])
   const [uploadedTelemetry, setUploadedTelemetry] = useState<Record<string, TelemetryPoint[]>>({})
-  const [customBgUrl, setCustomBgUrl] = useState<string | null>(null)
   const [isDragging, setIsDragging] = useState(false)
   const [pendingResultRound, setPendingResultRound] = useState<number | undefined>(undefined)
   const dragCounter = useRef(0)
@@ -203,7 +202,6 @@ export default function App() {
 
   const processFiles = useCallback(async (files: File[]) => {
     const csvFiles = files.filter((f) => f.name.toLowerCase().endsWith('.csv'))
-    const imgFiles = files.filter((f) => f.type.startsWith('image/') || /\.(png|jpe?g|webp|gif|svg)$/i.test(f.name))
 
     for (const file of csvFiles) {
       const match = file.name.match(/^([A-Za-z]{2,3})[^A-Za-z]/)
@@ -216,11 +214,6 @@ export default function App() {
           setActiveDrivers((prev) => new Set([...prev, code]))
         }
       } catch { /* skip unrecognised files */ }
-    }
-
-    for (const file of imgFiles) {
-      const url = URL.createObjectURL(file)
-      setCustomBgUrl((prev) => { if (prev) URL.revokeObjectURL(prev); return url })
     }
   }, [])
 
@@ -719,7 +712,7 @@ export default function App() {
     >
       {isDragging && (
         <div className="drop-overlay">
-          <div className="drop-hint">Drop CSV or image files here</div>
+          <div className="drop-hint">Drop telemetry CSV files here</div>
         </div>
       )}
 
@@ -858,7 +851,6 @@ export default function App() {
                         onProgressChange={handleProgressChange}
                         playing={playing}
                         onPlayPause={() => setPlaying((p) => !p)}
-                        bgImageUrl={customBgUrl ?? undefined}
                         battleGaps={battleGaps}
                         lapBoundaries={lapBoundaries}
                         totalLaps={totalLaps}
